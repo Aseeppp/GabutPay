@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Lapor Bug / Feedback{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title text-center">Lapor Bug / Kirim Feedback</h2>
+                <p class="text-center text-muted">Kami sangat menghargai masukan Anda untuk membuat GabutPay lebih baik.</p>
+                <form method="POST" action="{{ url_for('main.bug_report') }}">
+                    <div class="mb-3">
+                        <label for="subject" class="form-label">Subjek</label>
+                        <input type="text" class="form-control" id="subject" name="subject" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Deskripsi</label>
+                        <textarea class="form-control" id="description" name="description" rows="6" required></textarea>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Kirim Laporan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

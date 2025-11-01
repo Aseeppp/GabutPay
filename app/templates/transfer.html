@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title mb-0">Transfer Saldo</h2>
+            </div>
+            <div class="card-body">
+                <p>Saldo Anda saat ini: <strong class="fs-5">Rp {{ "{:,.2f}".format(current_user.balance / 100) }}</strong></p>
+                <hr>
+                <form method="POST" action="{{ url_for('main.transfer') }}">
+                    <div class="mb-3">
+                        <label for="recipient_email" class="form-label">Email Penerima</label>
+                        <input type="email" class="form-control" id="recipient_email" name="recipient_email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Jumlah Transfer</label>
+                        <div class="input-group">
+                            <span class="input-group-text">Rp</span>
+                            <input type="number" class="form-control" id="amount" name="amount" required step="0.01" min="10.00">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="pin" class="form-label">PIN Keamanan</label>
+                        <input type="password" inputmode="numeric" class="form-control" id="pin" name="pin" required maxlength="6" pattern="[0-9]{6}">
+                        <div class="form-text text-end"><a href="{{ url_for('auth.reset_pin_request') }}">Lupa PIN?</a></div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Kirim</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title mb-0">Konfirmasi Pembayaran</h2>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <p class="text-muted mb-1">Anda akan membayar kepada:</p>
+                    <p class="fs-5 fw-bold">{{ payment.merchant.api_keys[0].store_name if payment.merchant.api_keys else payment.merchant.email }}</p>
+                </div>
+
+                <div class="text-center mb-4">
+                    <p class="text-muted mb-1">Sebesar:</p>
+                    <p class="display-4 fw-bold">Rp {{ "{:,.2f}".format(payment.amount / 100) }}</p>
+                </div>
+
+                {% if payment.description %}
+                <div class="alert alert-secondary">
+                    <strong>Deskripsi:</strong> {{ payment.description }}
+                </div>
+                {% endif %}
+
+                <hr>
+
+                <p class="text-center">Saldo Anda saat ini: <strong>Rp {{ "{:,.2f}".format(current_user.balance / 100) }}</strong></p>
+
+                <form method="POST" action="{{ url_for('main.pay_page', signed_payment_id=request.view_args.signed_payment_id) }}">
+                    <div class="mb-3">
+                        <label for="pin" class="form-label">Masukkan PIN GabutPay Anda untuk melanjutkan</label>
+                        <input type="password" inputmode="numeric" class="form-control form-control-lg text-center" id="pin" name="pin" required maxlength="6" pattern="[0-9]{6}">
+                        <div class="form-text text-end"><a href="{{ url_for('auth.reset_pin_request') }}">Lupa PIN?</a></div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">Konfirmasi & Bayar</button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-muted text-center">
+                <small>Link pembayaran ini akan kedaluwarsa dalam 1 jam.</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

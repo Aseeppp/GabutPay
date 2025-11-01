@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Reset PIN{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body text-center">
+                <h2 class="card-title">Reset PIN Keamanan</h2>
+                <p>Kami akan mengirimkan link untuk mereset PIN ke email terdaftar Anda: <strong>{{ current_user.email }}</strong></p>
+                <form method="POST" action="{{ url_for('auth.reset_pin_request') }}">
+                    <button type="submit" class="btn btn-primary">Kirim Link Reset PIN</button>
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Batal</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

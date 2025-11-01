@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body text-center">
+                <h2 class="card-title">Verifikasi Akun Anda</h2>
+                <p>Kami telah mengirimkan kode OTP ke <strong>{{ email }}</strong>. Silakan masukkan kode di bawah ini.</p>
+                <form method="POST" action="{{ url_for('auth.verify_otp', email=email) }}">
+                    <div class="mb-3">
+                        <label for="otp" class="form-label">6-Digit OTP</label>
+                        <input type="text" inputmode="numeric" class="form-control form-control-lg text-center" id="otp" name="otp" required maxlength="6" pattern="[A-Z0-9]{6}">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Verifikasi</button>
+                    </div>
+                </form>
+                <div class="mt-3">
+                    <small>Tidak menerima kode? <a href="{{ url_for('auth.register') }}">Daftar ulang</a> untuk mengirim ulang.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Atur Nama Toko{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title text-center">Atur Nama Toko Anda</h2>
+                <p class="text-center text-muted">Anda harus mengatur nama toko sebelum bisa membuat API Key. Nama ini akan ditampilkan kepada pelanggan Anda.</p>
+                <form method="POST" action="{{ url_for('main.set_store_name') }}">
+                    <div class="mb-3">
+                        <label for="store_name" class="form-label">Nama Toko</label>
+                        <input type="text" class="form-control" id="store_name" name="store_name" required>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Simpan Nama Toko</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

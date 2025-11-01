@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Reset PIN Baru{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title text-center">Masukkan PIN Baru</h2>
+                <form method="POST" action="{{ url_for('auth.reset_pin_token', token=request.view_args.token) }}">
+                    <div class="mb-3">
+                        <label for="pin" class="form-label">PIN Baru (6 Digit)</label>
+                        <input type="password" inputmode="numeric" class="form-control" id="pin" name="pin" required maxlength="6" pattern="[0-9]{6}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirm_pin" class="form-label">Konfirmasi PIN Baru</label>
+                        <input type="password" inputmode="numeric" class="form-control" id="confirm_pin" name="confirm_pin" required maxlength="6" pattern="[0-9]{6}">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Reset PIN</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

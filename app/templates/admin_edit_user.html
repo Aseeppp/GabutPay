@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Pengguna: {{ user.email }}{% endblock %}
+
+{% block content %}
+    <h1 class="mb-1">Edit Pengguna</h1>
+    <p class="lead text-muted">{{ user.email }}</p>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <!-- Modify Balance -->
+            <div class="card mb-4">
+                <div class="card-header">Ubah Saldo</div>
+                <div class="card-body">
+                    <p>Saldo saat ini: <strong>Rp {{ "{:,.2f}".format(user.balance / 100) }}</strong></p>
+                    <form action="{{ url_for('admin.modify_balance', user_id=user.id) }}" method="POST">
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">Jumlah (Gunakan minus untuk mengurangi)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">Rp</span>
+                                <input type="number" class="form-control" id="amount" name="amount" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">Alasan</label>
+                            <input type="text" class="form-control" id="reason" name="reason" placeholder="Contoh: Top-up manual" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Terapkan</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Ban Management -->
+            <div class="card">
+                <div class="card-header">Manajemen Blokir</div>
+                <div class="card-body">
+                    {% if user.banned_until and user.banned_until > now() %}
+                        <p>Status: <span class="badge bg-danger">Diblokir</span> sampai {{ user.banned_until.strftime('%d %b %Y %H:%M') }} UTC</p>
+                        <form action="{{ url_for('admin.manage_ban', user_id=user.id) }}" method="POST" class="d-inline">
+                            <input type="hidden" name="action" value="unban">
+                            <button type="submit" class="btn btn-success">Buka Blokir</button>
+                        </form>
+                    {% else %}
+                        <p>Status: <span class="badge bg-success">Aktif</span></p>
+                        <form action="{{ url_for('admin.manage_ban', user_id=user.id) }}" method="POST">
+                            <input type="hidden" name="action" value="ban">
+                            <div class="mb-3">
+                                <label for="duration" class="form-label">Durasi Blokir</label>
+                                <select class="form-select" name="duration">
+                                    <option value="1_hour">1 Jam</option>
+                                    <option value="1_day">1 Hari</option>
+                                    <option value="permanent">Permanen</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-warning">Blokir Akun</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <!-- Delete Account -->
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">Zona Berbahaya</div>
+                <div class="card-body">
+                    <h5 class="card-title">Hapus Akun Pengguna</h5>
+                    <p class="card-text">Tindakan ini tidak bisa dibatalkan. Semua data pengguna, termasuk API key dan riwayat transaksi, akan dihapus secara permanen.</p>
+                    <form action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="POST" onsubmit="return confirm('ANDA YAKIN INGIN MENGHAPUS PENGGUNA INI SECARA PERMANEN?');">
+                        <button type="submit" class="btn btn-danger">Hapus Pengguna Ini</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

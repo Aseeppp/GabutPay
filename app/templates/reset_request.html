@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Reset Password{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title text-center">Reset Password</h2>
+                <p class="text-center text-muted">Masukkan alamat email Anda. Kami akan mengirimkan instruksi untuk mereset password Anda.</p>
+                <form method="POST" action="{{ url_for('auth.reset_request') }}">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Alamat Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Kirim Link Reset</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

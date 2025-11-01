@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Reset Password{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title text-center">Masukkan Password Baru</h2>
+                <form method="POST" action="{{ url_for('auth.reset_token', token=request.view_args.token) }}">
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password Baru</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirm_password" class="form-label">Konfirmasi Password Baru</label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Reset Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

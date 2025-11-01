@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card text-center">
+            <div class="card-header">
+                Konfirmasi Pembuatan API Key
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Biaya Pembuatan Key</h5>
+                <p class="display-4">Rp {{ "{:,.2f}".format(key_cost / 100) }}</p>
+                <p>Biaya ini akan dipotong dari saldo Anda.</p>
+                <hr>
+                <p>Saldo Anda saat ini: <strong>Rp {{ "{:,.2f}".format(current_user.balance / 100) }}</strong></p>
+                <p class="text-muted">Masukkan PIN keamanan Anda untuk melanjutkan.</p>
+                <form method="POST" action="{{ url_for('main.generate_key') }}" class="d-inline-block text-start">
+                    <div class="mb-3">
+                        <label for="store_name" class="form-label">Nama Toko</label>
+                        <input type="text" class="form-control" name="store_name" {% if is_first_key %}required{% else %}placeholder="Kosongkan untuk pakai nama toko utama"{% endif %}>
+                        {% if is_first_key %}<div class="form-text">Nama ini akan ditampilkan ke pelanggan Anda.</div>
+                        {% else %}<div class="form-text">Anda bisa mengatur nama toko berbeda untuk key ini.</div>{% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="pin" class="form-label">PIN Keamanan</label>
+                        <input type="password" inputmode="numeric" class="form-control form-control-lg" placeholder="6-Digit PIN" name="pin" required maxlength="6" pattern="[0-9]{6}">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">Konfirmasi & Bayar</button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-muted">
+                <a href="{{ url_for('main.dashboard') }}">Batal</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

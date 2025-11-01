@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Edit API Key{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title mb-0">Edit API Key</h2>
+            </div>
+            <div class="card-body">
+                <h5>Public Key</h5>
+                <p><code>{{ api_key.public_key }}</code></p>
+                <hr>
+                <form method="POST" action="{{ url_for('main.edit_key', key_id=api_key.id) }}">
+                    <div class="mb-3">
+                        <label for="webhook_url" class="form-label">URL Webhook</label>
+                        <input type="url" class="form-control" id="webhook_url" name="webhook_url" value="{{ api_key.webhook_url or '' }}" placeholder="https://tokoanda.com/webhook-receiver">
+                        <div class="form-text">URL ini akan menerima notifikasi khusus untuk pembayaran yang menggunakan API Key ini.</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Batal</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

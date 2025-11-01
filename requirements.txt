@@ -1,0 +1,7 @@
+Flask
+Flask-SQLAlchemy
+Flask-Login
+Flask-Bcrypt
+python-dotenv
+Flask-Mail
+requests

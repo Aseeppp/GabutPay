@@ -1,0 +1,127 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %} - GabutPay</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .navbar-logo {
+            height: 40px;
+        }
+        @media (min-width: 768px) {
+            .navbar-logo {
+                height: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('main.home') }}">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" class="navbar-logo" alt="GabutPay Logo">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.dashboard') }}">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.history') }}">Riwayat</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+                        </li>
+                        {% if current_user.is_admin %}
+                        <li class="nav-item">
+                            <a class="nav-link active" href="{{ url_for('admin.dashboard') }}">Admin Panel</a>
+                        </li>
+                        {% endif %}
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.home') }}">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-primary text-white" href="{{ url_for('auth.register') }}">Register</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer class="pt-4 my-md-5 pt-md-5 border-top">
+        <div class="row">
+            <div class="col-12 col-md">
+                <img class="mb-2 navbar-logo" src="{{ url_for('static', filename='images/logo.png') }}" alt="" height="40">
+                <small class="d-block mb-3 text-muted">&copy; 2025 GabutPay</small>
+                <small class="d-block mb-3 text-muted">Dibangun sepenuhnya oleh AI.</small>
+            </div>
+            <div class="col-6 col-md">
+                <h5>Resources</h5>
+                <ul class="list-unstyled text-small">
+                    <li class="mb-1"><a class="link-secondary text-decoration-none" href="{{ url_for('main.docs') }}">Dokumentasi</a></li>
+                    <li class="mb-1"><a class="link-secondary text-decoration-none" href="{{ url_for('main.changelog') }}">Changelog</a></li>
+                    <li class="mb-1"><a class="link-secondary text-decoration-none" href="{{ url_for('main.security') }}">Keamanan</a></li>
+                    <li class="mb-1"><a class="link-secondary text-decoration-none" href="{{ url_for('main.credits') }}">Credits</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-md">
+                <h5>Legal</h5>
+                <ul class="list-unstyled text-small">
+                    <li class="mb-1"><a class="link-secondary text-decoration-none" href="{{ url_for('main.terms') }}">Terms of Service</a></li>
+                    <li class="mb-1"><a class="link-secondary text-decoration-none" href="{{ url_for('main.privacy') }}">Privacy Policy</a></li>
+                    <li class="mb-1"><a class="link-secondary text-decoration-none" href="{{ url_for('main.disclaimer') }}">Disclaimer</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-md">
+                <h5>Support</h5>
+                <ul class="list-unstyled text-small">
+                    <li class="mb-1"><a class="link-secondary text-decoration-none" href="{{ url_for('main.support') }}">Help Center</a></li>
+                    <li class="mb-1"><a class="link-secondary text-decoration-none" href="{{ url_for('main.bug_report') }}">Lapor Bug</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function togglePasswordVisibility(fieldId) {
+            const field = document.getElementById(fieldId);
+            if (field.type === "password") {
+                field.type = "text";
+            } else {
+                field.type = "password";
+            }
+        }
+    </script>
+</body>
+</html>
