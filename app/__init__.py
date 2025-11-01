@@ -20,13 +20,22 @@ login_manager.login_message_category = 'info'
 def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
+    # Database Configuration
+    DATABASE_URL = os.environ.get('DATABASE_URL')
+    if DATABASE_URL and DATABASE_URL.startswith('postgres'):
+        # Use PostgreSQL on Railway, correcting the dialect name
+        app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+    else:
+        # Use SQLite for local development, ensuring the instance folder exists
+        db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'instance', 'gabutpay.db')
+        os.makedirs(os.path.dirname(db_path), exist_ok=True)
+        app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # Mail Configuration
     app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER')
-    app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT'))
-    app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS').lower() in ['true', 'on', '1']
+    app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', '587'))
+    app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True').lower() in ['true', 'on', '1']
     app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
     app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
     app.config['ADMIN_EMAIL'] = os.environ.get('ADMIN_EMAIL')
