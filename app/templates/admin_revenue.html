@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4" data-aos="fade-down">
+    <h1 class="h2">Laporan Keuangan Sistem</h1>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
+    </a>
+</div>
+
+<div class="row">
+    <!-- System Balance & Withdrawal -->
+    <div class="col-lg-4 mb-4" data-aos="fade-up">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Kas Sistem</h5>
+            </div>
+            <div class="card-body text-center">
+                <p class="card-text text-muted">Total Saldo Saat Ini</p>
+                <h2 class="card-title fw-bold display-5">Rp {{ "{:,.0f}".format(system_user.balance / 100) }}</h2>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mt-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Tarik Dana</h5>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted">Tarik dana dari Akun Kas Sistem ke akun admin Anda (<strong class="text-dark">{{ current_user.email }}</strong>).</p>
+                <form action="{{ url_for('admin.withdraw_revenue') }}" method="POST" novalidate>
+                    {{ form.hidden_tag() }}
+                    <div class="form-floating mb-3">
+                        {{ form.amount(class="form-control" + (" is-invalid" if form.amount.errors else ""), placeholder="Jumlah Penarikan") }}
+                        {{ form.amount.label() }}
+                        {% if form.amount.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.amount.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="form-floating mb-3">
+                        {{ form.pin(class="form-control text-center pin-input-style" + (" is-invalid" if form.pin.errors else ""), placeholder="PIN Keamanan Anda", type="password", inputmode="numeric", pattern="[0-9]*", maxlength="6") }}
+                        {{ form.pin.label() }}
+                        {% if form.pin.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.pin.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction History -->
+    <div class="col-lg-8" data-aos="fade-up" data-aos-delay="100">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Riwayat Transaksi Kas Sistem</h5>
+            </div>
+            <div class="card-body">
+                {% if transactions.items %}
+                    <div class="list-group list-group-flush">
+                        {% for tx in transactions.items %}
+                            <div class="list-group-item list-group-item-action px-0">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <div>
+                                        <h6 class="mb-1 fw-bold">{{ tx.description }}</h6>
+                                        <p class="mb-1 small text-muted">{{ tx.timestamp.strftime('%d %b %Y, %H:%M') }}</p>
+                                    </div>
+                                    {% if tx.amount >= 0 %}
+                                        <h5 class="text-success fw-bold text-nowrap">+ Rp {{ "{:,.0f}".format(tx.amount / 100) }}</h5>
+                                    {% else %}
+                                        <h5 class="text-danger fw-bold text-nowrap">- Rp {{ "{:,.0f}".format((tx.amount * -1) / 100) }}</h5>
+                                    {% endif %}
+                                </div>
+                                <span class="badge bg-secondary text-uppercase small">{{ tx.transaction_type.replace('_', ' ') }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center p-5">
+                        <i class="bi bi-clock-history fs-1 text-muted mb-3"></i>
+                        <p class="mb-0 fw-bold">Belum ada riwayat transaksi.</p>
+                        <p class="text-muted">Semua transaksi biaya admin akan muncul di sini.</p>
+                    </div>
+                {% endif %}
+            </div>
+            {% if transactions.pages > 1 %}
+            <div class="card-footer bg-transparent">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center mb-0">
+                        <li class="page-item {% if not transactions.has_prev %}disabled{% endif %}">
+                            <a class="page-link" href="{{ url_for('admin.revenue', page=transactions.prev_num) }}"><i class="bi bi-chevron-left"></i></a>
+                        </li>
+                        {% for page_num in transactions.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                            {% if page_num %}
+                                <li class="page-item {% if transactions.page == page_num %}active{% endif %}">
+                                    <a class="page-link" href="{{ url_for('admin.revenue', page=page_num) }}">{{ page_num }}</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link">…</span></li>
+                            {% endif %}
+                        {% endfor %}
+                        <li class="page-item {% if not transactions.has_next %}disabled{% endif %}">
+                            <a class="page-link" href="{{ url_for('admin.revenue', page=transactions.next_num) }}"><i class="bi bi-chevron-right"></i></a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

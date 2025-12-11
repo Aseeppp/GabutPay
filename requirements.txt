@@ -5,3 +5,12 @@ Flask-Bcrypt
 python-dotenv
 Flask-Mail
 requests
+Flask-WTF
+Flask-Talisman
+Flask-Limiter
+cryptography
+psycopg2-binary
+Flask-Migrate
+qrcode[pil]
+gunicorn
+pywebpush

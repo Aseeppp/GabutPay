@@ -1,0 +1,152 @@
+/* GabutPay Modern CSS */
+
+:root {
+    --primary-color: #6a5acd; /* SlateBlue */
+    --secondary-color: #f0e6ff; /* Lavender */
+    --accent-color: #ff6b6b; /* Coral */
+    --background-color: #f8f9fa; /* Light Gray */
+    --text-color: #343a40; /* Dark Gray */
+    --card-background: #ffffff; /* White */
+    --card-border-radius: 15px;
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+[data-bs-theme="dark"] {
+    --primary-color: #7b68ee; /* MediumSlateBlue */
+    --secondary-color: #3a364f; /* Dark Lavender */
+    --accent-color: #ff7f7f; /* Light Coral */
+    --background-color: #1a1a1a; /* Dark Background */
+    --text-color: #e0e0e0; /* Light Text */
+    --card-background: #2c2c2c; /* Dark Card */
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.navbar {
+    box-shadow: var(--box-shadow);
+    background-color: var(--card-background) !important;
+}
+
+.card {
+    border: none;
+    border-radius: var(--card-border-radius);
+    background-color: var(--card-background);
+    box-shadow: var(--box-shadow);
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.btn {
+    transition: transform 0.2s ease-in-out, background-color 0.2s, border-color 0.2s;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #5a4acd;
+    border-color: #5a4acd;
+}
+
+.alert {
+    border-radius: 10px;
+}
+
+.form-control {
+    border-radius: 10px;
+}
+
+.footer {
+    background-color: var(--card-background);
+    box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.otp-input {
+    color: var(--text-color) !important;
+}
+
+/* The Ultimate OTP Box Fix */
+.otp-box {
+    width: 45px;
+    height: 50px;
+    text-align: center;
+    font-size: 1.5rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    color: var(--text-color);
+    background-color: var(--bs-form-control-bg);
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+.otp-box:focus {
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25);
+}
+
+.navbar .bi {
+    color: var(--text-color);
+}
+
+/* PIN Input Style */
+.pin-input-style {
+    height: 48px;
+    font-size: 1.5rem;
+    line-height: 40px;
+    text-align: center;
+}
+
+/* Theme Switcher */
+.theme-switcher-container {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 11;
+}
+
+/* Admin Dashboard Stat Icon */
+.stat-icon {
+    width: 50px;
+    height: 50px;
+}
+
+/* QR Reader Style */
+#qr-reader {
+    width: 100%;
+    border: 1px solid #dee2e6;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+/* Navbar Profile Icon */
+.navbar-profile-icon {
+    vertical-align: text-bottom;
+}
+
+/* Payment Details Status Icon */
+.status-icon {
+    font-size: 4rem;
+}
+
+/* For Split Bill Form Textarea */
+.textarea-md {
+    height: 100px;
+}
+
+/* Dark Mode Fix for Muted Text and Secondary Links */
+.text-muted, .link-secondary {
+    color: var(--bs-secondary-color) !important;
+}

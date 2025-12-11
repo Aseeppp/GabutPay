@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Pembayaran Berhasil!</h4>
+                    <p class="card-text">Anda akan dialihkan ke halaman merchant.</p>
+                    <hr>
+                    <p class="text-muted">Tujuan:</p>
+                    <p><strong><a id="target-link" href="{{ target_url }}" rel="noopener noreferrer">{{ target_url }}</a></strong></p>
+                    <p id="countdown" class="text-muted mt-3">Mengarahkan dalam 5 detik...</p>
+                    <a href="{{ target_url }}" class="btn btn-primary mt-2">Lanjutkan Sekarang</a>
+                </div>
+            </div>
+            <p class="mt-3 text-muted small">
+                Pastikan URL di atas adalah tujuan yang Anda percaya. GabutPay tidak bertanggung jawab atas konten di situs eksternal.
+            </p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/redirect_timer.js') }}" defer></script>
+{% endblock %}

@@ -3,73 +3,190 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h2">Dashboard</h1>
-        <div class="btn-group">
-            <a href="{{ url_for('main.generate_key') }}" class="btn btn-primary">+ Generate New API Key</a>
-            {% if current_user.pin_hash %}
-            <a href="{{ url_for('main.transfer') }}" class="btn btn-success">Transfer Saldo</a>
-            {% endif %}
+<div class="mb-4" data-aos="fade-down">
+    <h1 class="h2">Dashboard</h1>
+    <p class="text-muted">Selamat datang kembali, <strong>{{ current_user.email }}</strong>!</p>
+</div>
+
+<!-- Action Buttons -->
+<div class="row g-2 mb-4 text-center" data-aos="fade-down" data-aos-delay="100">
+    <div class="col-md">
+        <div class="d-grid">
+            <a href="{{ url_for('main.request_payment') }}" class="btn btn-primary btn-lg">
+                <i class="bi bi-qr-code me-1"></i> Minta Bayar (QR)
+            </a>
         </div>
     </div>
-
-    <p>Selamat datang, <strong>{{ current_user.email }}</strong>!</p>
-
-    <div class="card bg-light mb-4">
-        <div class="card-body">
-            <h5 class="card-title">Saldo Anda</h5>
-            <p class="card-text fs-2 fw-bold">Rp {{ "{:,.2f}".format(current_user.balance / 100) }}</p>
+    <div class="col-md">
+        <div class="d-grid">
+            <a href="{{ url_for('main.scan_qr') }}" class="btn btn-info btn-lg">
+                <i class="bi bi-qr-code-scan me-1"></i> Pindai & Bayar
+            </a>
         </div>
     </div>
-
-    {% if not current_user.pin_hash %}
-    <div class="alert alert-warning" role="alert">
-        <h4 class="alert-heading">Aksi Diperlukan!</h4>
-        <p>Anda belum mengatur PIN keamanan. PIN diperlukan untuk membuat API Key dan melakukan transfer. </p>
-        <hr>
-        <a href="{{ url_for('main.set_pin') }}" class="btn btn-warning">Atur PIN Sekarang</a>
+    {% if current_user.pin_hash %}
+    <div class="col-md">
+        <div class="d-grid">
+            <a href="{{ url_for('main.create_split_bill') }}" class="btn btn-warning btn-lg">
+                <i class="bi bi-people-fill me-1"></i> Buat Patungan
+            </a>
+        </div>
+    </div>
+    <div class="col-md">
+        <div class="d-grid">
+            <a href="{{ url_for('main.transfer') }}" class="btn btn-success btn-lg">
+                <i class="bi bi-send-fill me-1"></i> Transfer Saldo
+            </a>
+        </div>
     </div>
     {% endif %}
+</div>
 
-    <div class="card">
-        <div class="card-header">
-            Your API Keys
-        </div>
-        <div class="card-body">
-            {% if keys %}
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th scope="col">Public Key</th>
-                            <th scope="col">Nama Toko</th>
-                            <th scope="col">Created At</th>
-                            <th scope="col">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for key in keys %}
-                            <tr>
-                                <td><code>{{ key.public_key }}</code></td>
-                                <td>{{ key.store_name }}</td>
-                                <td>{{ key.created_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC</td>
-                                <td>
-                                    <form action="{{ url_for('main.reset_key') }}" method="POST" class="d-inline">
-                                        <input type="hidden" name="key_id" value="{{ key.id }}">
-                                        <button type="submit" class="btn btn-warning btn-sm">Reset</button>
-                                    </form>
-                                    <a href="{{ url_for('main.edit_key', key_id=key.id) }}" class="btn btn-info btn-sm">Edit</a>
-                                    <form action="{{ url_for('main.delete_key') }}" method="POST" class="d-inline" onsubmit="return confirm('Anda yakin ingin menghapus key ini secara permanen?');">
-                                        <input type="hidden" name="key_id" value="{{ key.id }}">
-                                        <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p class="text-center">Anda belum memiliki API Key. Klik tombol di atas untuk membuatnya.</p>
-            {% endif %}
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow-sm" data-aos="fade-up" data-aos-delay="200">
+            <div class="card-header d-flex justify-content-between align-items-center bg-transparent border-bottom-0">
+                <h5 class="mb-0">API Keys Anda</h5>
+                <a href="{{ url_for('main.generate_key') }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-plus-lg"></i> Buat Key Baru
+                </a>
+            </div>
+            <div class="card-body">
+                {% if keys %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col">Nama Toko</th>
+                                    <th scope="col">Public Key</th>
+                                    <th scope="col">Dibuat</th>
+                                    <th scope="col" class="text-end">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for key in keys %}
+                                    <tr>
+                                        <td class="fw-bold">{{ key.store_name }}</td>
+                                        <td><code>{{ key.public_key }}</code></td>
+                                        <td><small class="text-muted">{{ key.created_at.strftime('%d %b %Y') }}</small></td>
+                                        <td class="text-end">
+                                            <div class="btn-group">
+                                                <a href="{{ url_for('main.edit_key', key_id=key.id) }}" class="btn btn-sm btn-outline-secondary">
+                                                    <i class="bi bi-pencil-fill"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#resetKeyModal-{{ key.id }}">
+                                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteKeyModal-{{ key.id }}">
+                                                    <i class="bi bi-trash-fill"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center p-4">
+                        <i class="bi bi-key-fill fs-1 text-muted mb-3"></i>
+                        <p class="mb-2 fw-bold">Anda belum memiliki API Key.</p>
+                        <p class="text-muted">Klik tombol di atas untuk membuatnya dan mulai integrasi.</p>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card text-white bg-primary shadow-lg mb-4" data-aos="fade-left" data-aos-delay="200">
+            <div class="card-body">
+                <h5 class="card-title text-uppercase">Saldo Anda</h5>
+                <p class="card-text display-4 fw-bold">Rp {{ "{:,.0f}".format(current_user.balance / 100) }}</p>
+            </div>
+        </div>
+        <div class="card shadow-sm mb-4" data-aos="fade-left" data-aos-delay="300">
+            <div class="card-body text-center">
+                <i class="bi bi-fire fs-1 text-warning"></i>
+                <h5 class="card-title mt-2">Login Beruntun</h5>
+                <p class="card-text display-4 fw-bold">{{ current_user.login_streak }}</p>
+                <p class="text-muted mb-0">Hari! Terus pertahankan untuk bonus lebih besar.</p>
+            </div>
+        </div>
+        {% if not current_user.pin_hash %}
+        <div class="card border-warning shadow-sm" data-aos="fade-left" data-aos-delay="300">
+            <div class="card-body text-center">
+                <i class="bi bi-shield-exclamation fs-1 text-warning mb-3"></i>
+                <h5 class="card-title">Aksi Diperlukan!</h5>
+                <p class="small">Anda belum mengatur PIN keamanan. PIN diperlukan untuk membuat API Key dan melakukan transfer.</p>
+                <a href="{{ url_for('main.set_pin') }}" class="btn btn-warning">Atur PIN Sekarang</a>
+            </div>
+        </div>
+        {% endif %}
+        <div id="subscribe-card" class="card border-info shadow-sm mt-4" data-aos="fade-left" data-aos-delay="400" style="display: none;">
+            <div class="card-body text-center">
+                <i class="bi bi-bell-fill fs-1 text-info mb-3"></i>
+                <h5 class="card-title">Dapatkan Notifikasi!</h5>
+                <p class="small">Aktifkan notifikasi untuk mendapatkan pemberitahuan instan saat Anda menerima pembayaran.</p>
+                <button id="subscribe-button" class="btn btn-info" data-vapid-key="{{ vapid_public_key }}">Aktifkan Notifikasi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+{% for key in keys %}
+<!-- Reset Modal -->
+<div class="modal fade" id="resetKeyModal-{{ key.id }}" tabindex="-1" aria-labelledby="resetKeyModalLabel-{{ key.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h1 class="modal-title fs-5" id="resetKeyModalLabel-{{ key.id }}">Reset API Key?</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Anda yakin ingin mereset API Key untuk <strong>{{ key.store_name }}</strong>?</p>
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong>Peringatan:</strong> Secret Key dan Webhook Secret yang lama akan segera tidak valid. Anda harus memperbarui aplikasi Anda dengan kunci yang baru.
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <form action="{{ url_for('main.reset_key') }}" method="POST" class="d-inline">
+                    {{ reset_form.csrf_token }}
+                    <input type="hidden" name="key_id" value="{{ key.id }}">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    {{ reset_form.submit(class="btn btn-warning", value="Ya, Reset Key") }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteKeyModal-{{ key.id }}" tabindex="-1" aria-labelledby="deleteKeyModalLabel-{{ key.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h1 class="modal-title fs-5" id="deleteKeyModalLabel-{{ key.id }}">Hapus API Key?</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Anda yakin ingin menghapus API Key untuk <strong>{{ key.store_name }}</strong> secara permanen?</p>
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-octagon-fill me-2"></i>
+                    <strong>Peringatan:</strong> Tindakan ini tidak dapat dibatalkan.
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <form action="{{ url_for('main.delete_key') }}" method="POST" class="d-inline">
+                    {{ delete_form.csrf_token }}
+                    <input type="hidden" name="key_id" value="{{ key.id }}">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    {{ delete_form.submit(class="btn btn-danger", value="Ya, Hapus Key") }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
 {% endblock %}

@@ -4,33 +4,64 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title mb-0">Transfer Saldo</h2>
-            </div>
-            <div class="card-body">
-                <p>Saldo Anda saat ini: <strong class="fs-5">Rp {{ "{:,.2f}".format(current_user.balance / 100) }}</strong></p>
-                <hr>
-                <form method="POST" action="{{ url_for('main.transfer') }}">
-                    <div class="mb-3">
-                        <label for="recipient_email" class="form-label">Email Penerima</label>
-                        <input type="email" class="form-control" id="recipient_email" name="recipient_email" required>
+    <div class="col-md-8 col-lg-5" data-aos="fade-up">
+        <div class="card border-0 shadow-lg">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <h1 class="h4 fw-bold">Transfer Saldo</h1>
+                    <p class="text-muted">Kirim uang ke sesama pengguna GabutPay.</p>
+                </div>
+
+                <div class="text-center mb-4">
+                    <p class="text-muted mb-1">Saldo Anda Saat Ini</p>
+                    <p class="h2 fw-bold">Rp {{ "{:,.0f}".format(current_user.balance / 100) }}</p>
+                </div>
+                
+                <form method="POST" action="{{ url_for('main.transfer') }}" novalidate>
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="form-floating mb-3">
+                        {{ form.recipient_email(class="form-control" + (" is-invalid" if form.recipient_email.errors else ""), id="floatingEmail", placeholder="Email Penerima", required=True) }}
+                        {{ form.recipient_email.label(for="floatingEmail") }}
+                        {% if form.recipient_email.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.recipient_email.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
-                    <div class="mb-3">
-                        <label for="amount" class="form-label">Jumlah Transfer</label>
-                        <div class="input-group">
-                            <span class="input-group-text">Rp</span>
-                            <input type="number" class="form-control" id="amount" name="amount" required step="0.01" min="10.00">
-                        </div>
+                    
+                    <div class="form-floating mb-3">
+                        {{ form.amount(class="form-control" + (" is-invalid" if form.amount.errors else ""), id="floatingAmount", placeholder="Jumlah Transfer", required=True) }}
+                        {{ form.amount.label(for="floatingAmount") }}
+                        {% if form.amount.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.amount.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div id="fee-details" class="form-text mt-2" data-payer-fee-percent="{{ payer_fee_percent }}"></div>
                     </div>
-                    <div class="mb-3">
-                        <label for="pin" class="form-label">PIN Keamanan</label>
-                        <input type="password" inputmode="numeric" class="form-control" id="pin" name="pin" required maxlength="6" pattern="[0-9]{6}">
-                        <div class="form-text text-end"><a href="{{ url_for('auth.reset_pin_request') }}">Lupa PIN?</a></div>
+                    
+                    <div class="form-floating mb-3">
+                        {{ form.pin(class="form-control pin-input-style" + (" is-invalid" if form.pin.errors else ""), id="floatingPin", placeholder="PIN Keamanan", required=True, autocomplete="one-time-code", type="password", inputmode="numeric", pattern="[0-9]*", maxlength="6") }}
+                        {{ form.pin.label(for="floatingPin") }}
+                        {% if form.pin.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.pin.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
+                    <div class="text-end mb-3">
+                        <a href="{{ url_for('auth.reset_pin_request') }}" class="small text-decoration-none">Lupa PIN?</a>
+                    </div>
+
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Kirim</button>
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
                     </div>
                 </form>
             </div>

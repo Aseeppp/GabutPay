@@ -3,74 +3,134 @@
 {% block title %}Edit Pengguna: {{ user.email }}{% endblock %}
 
 {% block content %}
-    <h1 class="mb-1">Edit Pengguna</h1>
-    <p class="lead text-muted">{{ user.email }}</p>
+<div class="d-flex justify-content-between align-items-center mb-4" data-aos="fade-down">
+    <div>
+        <h1 class="h2 mb-1">Edit Pengguna</h1>
+        <p class="lead text-muted">{{ user.email }}</p>
+    </div>
+    <a href="{{ url_for('admin.users') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Kembali ke Daftar Pengguna
+    </a>
+</div>
 
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <!-- Modify Balance -->
-            <div class="card mb-4">
-                <div class="card-header">Ubah Saldo</div>
-                <div class="card-body">
-                    <p>Saldo saat ini: <strong>Rp {{ "{:,.2f}".format(user.balance / 100) }}</strong></p>
-                    <form action="{{ url_for('admin.modify_balance', user_id=user.id) }}" method="POST">
-                        <div class="mb-3">
-                            <label for="amount" class="form-label">Jumlah (Gunakan minus untuk mengurangi)</label>
-                            <div class="input-group">
-                                <span class="input-group-text">Rp</span>
-                                <input type="number" class="form-control" id="amount" name="amount" step="0.01" required>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="reason" class="form-label">Alasan</label>
-                            <input type="text" class="form-control" id="reason" name="reason" placeholder="Contoh: Top-up manual" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Terapkan</button>
-                    </form>
-                </div>
+<div class="row mt-4 g-4">
+    <div class="col-lg-7">
+        <!-- Modify Balance -->
+        <div class="card shadow-sm mb-4" data-aos="fade-up" data-aos-delay="100">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">Ubah Saldo</h5>
             </div>
-
-            <!-- Ban Management -->
-            <div class="card">
-                <div class="card-header">Manajemen Blokir</div>
-                <div class="card-body">
-                    {% if user.banned_until and user.banned_until > now() %}
-                        <p>Status: <span class="badge bg-danger">Diblokir</span> sampai {{ user.banned_until.strftime('%d %b %Y %H:%M') }} UTC</p>
-                        <form action="{{ url_for('admin.manage_ban', user_id=user.id) }}" method="POST" class="d-inline">
-                            <input type="hidden" name="action" value="unban">
-                            <button type="submit" class="btn btn-success">Buka Blokir</button>
-                        </form>
-                    {% else %}
-                        <p>Status: <span class="badge bg-success">Aktif</span></p>
-                        <form action="{{ url_for('admin.manage_ban', user_id=user.id) }}" method="POST">
-                            <input type="hidden" name="action" value="ban">
-                            <div class="mb-3">
-                                <label for="duration" class="form-label">Durasi Blokir</label>
-                                <select class="form-select" name="duration">
-                                    <option value="1_hour">1 Jam</option>
-                                    <option value="1_day">1 Hari</option>
-                                    <option value="permanent">Permanen</option>
-                                </select>
+            <div class="card-body">
+                <p>Saldo saat ini: <strong class="fs-4 fw-bold">Rp {{ "{:,.0f}".format(user.balance / 100) }}</strong></p>
+                <hr>
+                <form action="{{ url_for('admin.modify_balance', user_id=user.id) }}" method="POST" novalidate>
+                    {{ modify_balance_form.hidden_tag() }}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                {{ modify_balance_form.amount(class="form-control" + (" is-invalid" if modify_balance_form.amount.errors else ""), id="floatingAmount", placeholder="Jumlah") }}
+                                {{ modify_balance_form.amount.label(for="floatingAmount") }}
+                                {% if modify_balance_form.amount.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in modify_balance_form.amount.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
                             </div>
-                            <button type="submit" class="btn btn-warning">Blokir Akun</button>
-                        </form>
-                    {% endif %}
-                </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                {{ modify_balance_form.reason(class="form-control" + (" is-invalid" if modify_balance_form.reason.errors else ""), id="floatingReason", placeholder="Alasan") }}
+                                {{ modify_balance_form.reason.label(for="floatingReason") }}
+                                {% if modify_balance_form.reason.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in modify_balance_form.reason.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {{ modify_balance_form.submit(class="btn btn-primary") }}
+                </form>
             </div>
         </div>
 
-        <div class="col-md-6">
-            <!-- Delete Account -->
-            <div class="card border-danger">
-                <div class="card-header bg-danger text-white">Zona Berbahaya</div>
-                <div class="card-body">
-                    <h5 class="card-title">Hapus Akun Pengguna</h5>
-                    <p class="card-text">Tindakan ini tidak bisa dibatalkan. Semua data pengguna, termasuk API key dan riwayat transaksi, akan dihapus secara permanen.</p>
-                    <form action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="POST" onsubmit="return confirm('ANDA YAKIN INGIN MENGHAPUS PENGGUNA INI SECARA PERMANEN?');">
-                        <button type="submit" class="btn btn-danger">Hapus Pengguna Ini</button>
+        <!-- Ban Management -->
+        <div class="card shadow-sm" data-aos="fade-up" data-aos-delay="200">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">Manajemen Blokir</h5>
+            </div>
+            <div class="card-body">
+                {% if user.banned_until and user.banned_until > now() %}
+                    <p>Status: <span class="badge bg-danger">Diblokir</span> sampai {{ user.banned_until.strftime('%d %b %Y %H:%M') }} UTC</p>
+                    <form action="{{ url_for('admin.manage_ban', user_id=user.id) }}" method="POST" class="d-inline">
+                        {{ manage_ban_form.hidden_tag() }}
+                        <input type="hidden" name="action" value="unban">
+                        {{ manage_ban_form.submit(class="btn btn-success", value="Buka Blokir") }}
                     </form>
-                </div>
+                {% else %}
+                    <p>Status: <span class="badge bg-success">Aktif</span></p>
+                    <form action="{{ url_for('admin.manage_ban', user_id=user.id) }}" method="POST" class="row g-3 align-items-end">
+                        {{ manage_ban_form.hidden_tag() }}
+                        <input type="hidden" name="action" value="ban">
+                        <div class="col-md-8">
+                            <label for="duration" class="form-label">Durasi Blokir</label>
+                            <select class="form-select" name="duration" id="duration">
+                                <option value="1_hour">1 Jam</option>
+                                <option value="1_day">1 Hari</option>
+                                <option value="permanent">Permanen</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            {{ manage_ban_form.submit(class="btn btn-warning w-100", value="Blokir Akun") }}
+                        </div>
+                    </form>
+                {% endif %}
             </div>
         </div>
     </div>
+
+    <div class="col-lg-5">
+        <!-- Delete Account -->
+        <div class="card border-danger shadow-sm" data-aos="fade-up" data-aos-delay="300">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i>Zona Berbahaya</h5>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Hapus Akun Pengguna</h5>
+                <p class="card-text small">Tindakan ini tidak bisa dibatalkan. Semua data pengguna, termasuk API key dan riwayat transaksi, akan dihapus secara permanen.</p>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal">
+                    Hapus Pengguna Ini
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete User Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h1 class="modal-title fs-5" id="deleteUserModalLabel">Hapus Pengguna?</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Anda benar-benar yakin ingin menghapus pengguna <strong>{{ user.email }}</strong> secara permanen?</p>
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-octagon-fill me-2"></i>
+                    <strong>Peringatan:</strong> Tindakan ini tidak dapat dibatalkan.
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <form action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="POST">
+                    {{ delete_user_form.hidden_tag() }}
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    {{ delete_user_form.submit(class="btn btn-danger", value="Ya, Hapus Pengguna") }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

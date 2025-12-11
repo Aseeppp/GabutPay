@@ -1,0 +1,38 @@
+<footer class="py-5 mt-auto">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 col-md-3 mb-3">
+                <a class="navbar-brand fw-bold" href="{{ url_for('main.home') }}">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="GabutPay Logo" width="24" height="24" class="d-inline-block align-text-top me-2">
+                    GabutPay
+                </a>
+                <small class="d-block text-muted mt-2">&copy; 2025 GabutPay</small>
+                <small class="d-block text-muted">Dibangun sepenuhnya oleh AI.</small>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <h5>Resources</h5>
+                <ul class="list-unstyled text-small">
+                    <li class="mb-1"><a class="link-secondary text-decoration-none" href="{{ url_for('main.docs') }}">Dokumentasi</a></li>
+                    <li class="mb-1"><a class="link-secondary text-decoration-none" href="{{ url_for('main.changelog') }}">Changelog</a></li>
+                    <li class="mb-1"><a class="link-secondary text-decoration-none" href="{{ url_for('main.security') }}">Keamanan</a></li>
+                    <li class="mb-1"><a class="link-secondary text-decoration-none" href="{{ url_for('main.credits') }}">Credits</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <h5>Legal</h5>
+                <ul class="list-unstyled text-small">
+                    <li class="mb-1"><a class="link-secondary text-decoration-none" href="{{ url_for('main.terms') }}">Terms of Service</a></li>
+                    <li class="mb-1"><a class="link-secondary text-decoration-none" href="{{ url_for('main.privacy') }}">Privacy Policy</a></li>
+                    <li class="mb-1"><a class="link-secondary text-decoration-none" href="{{ url_for('main.disclaimer') }}">Disclaimer</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <h5>Support</h5>
+                <ul class="list-unstyled text-small">
+                    <li class="mb-1"><a class="link-secondary text-decoration-none" href="{{ url_for('main.support') }}">Help Center</a></li>
+                    <li class="mb-1"><a class="link-secondary text-decoration-none" href="{{ url_for('main.bug_report') }}">Lapor Bug</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</footer>

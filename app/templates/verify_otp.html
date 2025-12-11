@@ -1,26 +1,37 @@
 {% extends "base.html" %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}Verifikasi OTP{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-body text-center">
-                <h2 class="card-title">Verifikasi Akun Anda</h2>
-                <p>Kami telah mengirimkan kode OTP ke <strong>{{ email }}</strong>. Silakan masukkan kode di bawah ini.</p>
-                <form method="POST" action="{{ url_for('auth.verify_otp', email=email) }}">
-                    <div class="mb-3">
-                        <label for="otp" class="form-label">6-Digit OTP</label>
-                        <input type="text" inputmode="numeric" class="form-control form-control-lg text-center" id="otp" name="otp" required maxlength="6" pattern="[A-Z0-9]{6}">
+    <div class="col-md-6 col-lg-5" data-aos="fade-up">
+        <div class="card border-0 shadow-lg">
+            <div class="card-body p-5 text-center">
+                <h1 class="h4 fw-bold mb-3">Verifikasi Akun Anda</h1>
+                <p class="text-muted">Kami telah mengirimkan kode OTP ke <strong>{{ email }}</strong>. Silakan masukkan kode di bawah ini.</p>
+                
+                <form method="POST" action="{{ url_for('auth.verify_otp', email=email) }}" novalidate class="mt-4">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-4">
+                        {{ form.otp.label(class="form-label") }}
+                        {{ form.otp(class="form-control form-control-lg text-center pin-input-style", placeholder="Masukkan 6-digit kode", maxlength="6", autocomplete="one-time-code", inputmode="numeric") }}
+                        {% if form.otp.errors %}
+                            <div class="invalid-feedback d-block text-center mt-2">
+                                {% for error in form.otp.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
+
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Verifikasi</button>
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
                     </div>
                 </form>
-                <div class="mt-3">
-                    <small>Tidak menerima kode? <a href="{{ url_for('auth.register') }}">Daftar ulang</a> untuk mengirim ulang.</small>
-                </div>
+            </div>
+            <div class="card-footer text-center py-3 bg-light border-0">
+                <small>Tidak menerima kode? <a href="{{ url_for('auth.register') }}" class="text-decoration-none">Daftar ulang</a> untuk mengirim ulang.</small>
             </div>
         </div>
     </div>

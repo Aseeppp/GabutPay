@@ -1,33 +1,49 @@
 {% extends "base.html" %}
 
-{% block title %}Your New API Keys{% endblock %}
+{% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-    <div class="alert alert-warning" role="alert">
-        <h4 class="alert-heading">PENTING!</h4>
-        <p>Ini adalah satu-satunya waktu kami akan menampilkan <strong>Secret Key</strong> dan <strong>Webhook Secret</strong> Anda. Harap salin dan simpan di tempat yang aman sekarang juga. Jika hilang, Anda harus membuat API Key yang baru.</p>
-    </div>
+<div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8" data-aos="fade-up">
+        <div class="text-center mb-4">
+            <h1 class="h2">Kunci API Berhasil Dibuat</h1>
+        </div>
 
-    <div class="card">
-        <div class="card-header">
-            New API Keys Generated
+        <div class="alert alert-danger" role="alert">
+            <h4 class="alert-heading"><i class="bi bi-exclamation-triangle-fill me-2"></i> PENTING!</h4>
+            <p>Ini adalah satu-satunya waktu kami akan menampilkan <strong>Secret Key</strong> dan <strong>Webhook Secret</strong> Anda. Harap salin dan simpan di tempat yang aman sekarang juga.</p>
+            <hr>
+            <p class="mb-0">Jika hilang, Anda harus mereset API Key ini.</p>
         </div>
-        <div class="card-body">
-            <div class="mb-3">
-                <label class="form-label"><strong>Public Key</strong></label>
-                <input type="text" class="form-control" value="{{ public_key }}" readonly>
+
+        <div class="card border-0 shadow-lg">
+            <div class="card-body p-5">
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Public Key</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" value="{{ public_key }}" readonly id="publicKey">
+                        <button class="btn btn-outline-secondary" data-copy-target="publicKey"><i class="bi bi-clipboard"></i> Salin</button>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Secret Key</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" value="{{ secret_key }}" readonly id="secretKey">
+                        <button class="btn btn-outline-secondary" data-copy-target="secretKey"><i class="bi bi-clipboard"></i> Salin</button>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Webhook Secret</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" value="{{ webhook_secret }}" readonly id="webhookSecret">
+                        <button class="btn btn-outline-secondary" data-copy-target="webhookSecret"><i class="bi bi-clipboard"></i> Salin</button>
+                    </div>
+                </div>
+                <div class="d-grid mt-5">
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary btn-lg">Kembali ke Dashboard</a>
+                </div>
             </div>
-            <div class="mb-3">
-                <label class="form-label"><strong>Secret Key</strong></label>
-                <input type="text" class="form-control" value="{{ secret_key }}" readonly>
-            </div>
-            <div class="mb-3">
-                <label class="form-label"><strong>Webhook Secret</strong></label>
-                <input type="text" class="form-control" value="{{ webhook_secret }}" readonly>
-            </div>
-        </div>
-        <div class="card-footer text-end">
-            <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">Kembali ke Dashboard</a>
         </div>
     </div>
+</div>
 {% endblock %}

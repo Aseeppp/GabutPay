@@ -4,45 +4,62 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title mb-0">Konfirmasi Pembayaran</h2>
-            </div>
-            <div class="card-body">
+    <div class="col-md-8 col-lg-5" data-aos="fade-up">
+        <div class="card border-0 shadow-lg">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <h1 class="h4 fw-bold">Konfirmasi Pembayaran</h1>
+                </div>
+
                 <div class="text-center mb-4">
                     <p class="text-muted mb-1">Anda akan membayar kepada:</p>
                     <p class="fs-5 fw-bold">{{ payment.merchant.api_keys[0].store_name if payment.merchant.api_keys else payment.merchant.email }}</p>
                 </div>
 
                 <div class="text-center mb-4">
-                    <p class="text-muted mb-1">Sebesar:</p>
-                    <p class="display-4 fw-bold">Rp {{ "{:,.2f}".format(payment.amount / 100) }}</p>
+                    <p class="text-muted mb-1">Total Pembayaran:</p>
+                    <p class="display-4 fw-bold">Rp {{ "{:,.0f}".format(total_debited / 100) }}</p>
+                    <p class="text-muted small">
+                        (Harga Produk: Rp {{ "{:,.0f}".format(payment.amount / 100) }} + 
+                        Biaya Layanan: Rp {{ "{:,.0f}".format(payer_fee / 100) }})
+                    </p>
                 </div>
 
                 {% if payment.description %}
-                <div class="alert alert-secondary">
+                <div class="alert alert-secondary text-center">
                     <strong>Deskripsi:</strong> {{ payment.description }}
                 </div>
                 {% endif %}
 
-                <hr>
+                <hr class="my-4">
 
-                <p class="text-center">Saldo Anda saat ini: <strong>Rp {{ "{:,.2f}".format(current_user.balance / 100) }}</strong></p>
+                <p class="text-center">Saldo Anda saat ini: <strong class="fw-bold">Rp {{ "{:,.0f}".format(current_user.balance / 100) }}</strong></p>
 
-                <form method="POST" action="{{ url_for('main.pay_page', signed_payment_id=request.view_args.signed_payment_id) }}">
-                    <div class="mb-3">
-                        <label for="pin" class="form-label">Masukkan PIN GabutPay Anda untuk melanjutkan</label>
-                        <input type="password" inputmode="numeric" class="form-control form-control-lg text-center" id="pin" name="pin" required maxlength="6" pattern="[0-9]{6}">
-                        <div class="form-text text-end"><a href="{{ url_for('auth.reset_pin_request') }}">Lupa PIN?</a></div>
+                <form method="POST" action="{{ url_for('main.pay_page', signed_payment_id=request.view_args.signed_payment_id) }}" novalidate class="mt-4">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="form-floating mb-3">
+                        {{ form.pin(class="form-control form-control-lg text-center pin-input-style" + (" is-invalid" if form.pin.errors else ""), id="floatingPin", placeholder="PIN Keamanan", required=True, autocomplete="one-time-code", type="password", inputmode="numeric", pattern="[0-9]*", maxlength="6") }}
+                        {{ form.pin.label(for="floatingPin") }}
+                        {% if form.pin.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.pin.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
+                    <div class="text-end mb-3">
+                        <a href="{{ url_for('auth.reset_pin_request') }}" class="small text-decoration-none">Lupa PIN?</a>
+                    </div>
+                    
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg">Konfirmasi & Bayar</button>
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
                     </div>
                 </form>
             </div>
-            <div class="card-footer text-muted text-center">
-                <small>Link pembayaran ini akan kedaluwarsa dalam 1 jam.</small>
+            <div class="card-footer text-body-secondary text-center bg-light border-0">
+                <small><i class="bi bi-clock"></i> Link pembayaran ini akan kedaluwarsa dalam 10 menit.</small>
             </div>
         </div>
     </div>

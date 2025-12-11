@@ -1,13 +1,45 @@
 {% extends "base.html" %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Sandbox E-Wallet untuk Developer{% endblock %}
 
 {% block content %}
-    <div class="p-5 mb-4 bg-light rounded-3">
-        <div class="container-fluid py-5">
-            <h1 class="display-5 fw-bold">Selamat Datang di GabutPay</h1>
-            <p class="col-md-8 fs-4">Platform sandbox e-wallet paling gabut untuk para developer menguji integrasi pembayaran. Aman, cepat, dan pastinya... gabut.</p>
-            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">Mulai Sekarang</a>
+<div class="container px-4 py-5 text-center">
+    <div class="py-5" data-aos="fade-up">
+        <h1 class="display-4 fw-bold">Selamat Datang di GabutPay</h1>
+        <div class="col-lg-6 mx-auto">
+            <p class="lead mb-4">Platform sandbox e-wallet paling gabut untuk para developer menguji integrasi pembayaran. Aman, cepat, dan pastinya... gabut.</p>
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-4 gap-3">Mulai Sekarang</a>
+                <a href="{{ url_for('main.docs') }}" class="btn btn-outline-secondary btn-lg px-4">Lihat Dokumentasi</a>
+            </div>
         </div>
     </div>
+</div>
+
+<div class="container px-4 py-5" id="featured-3">
+    <h2 class="pb-2 border-bottom text-center" data-aos="fade-up">Kenapa Pilih GabutPay?</h2>
+    <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+        <div class="feature col" data-aos="fade-up" data-aos-delay="100">
+            <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3">
+                <i class="bi bi-lightning-charge-fill" style="font-size: 2rem;"></i>
+            </div>
+            <h3 class="fs-2">Cepat & Mudah</h3>
+            <p>Uji coba API pembayaran Anda dalam hitungan menit, bukan hari. Dokumentasi yang jelas dan proses yang disederhanakan.</p>
+        </div>
+        <div class="feature col" data-aos="fade-up" data-aos-delay="200">
+            <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3">
+                <i class="bi bi-shield-lock-fill" style="font-size: 2rem;"></i>
+            </div>
+            <h3 class="fs-2">Aman & Terisolasi</h3>
+            <p>Lingkungan sandbox yang sepenuhnya terisolasi untuk memastikan pengujian Anda tidak memengaruhi data produksi.</p>
+        </div>
+        <div class="feature col" data-aos="fade-up" data-aos-delay="300">
+            <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3">
+                <i class="bi bi-code-slash" style="font-size: 2rem;"></i>
+            </div>
+            <h3 class="fs-2">Developer-Friendly</h3>
+            <p>Didesain oleh developer, untuk developer. API yang bersih, webhook yang andal, dan alat bantu yang berguna.</p>
+        </div>
+    </div>
+</div>
 {% endblock %}

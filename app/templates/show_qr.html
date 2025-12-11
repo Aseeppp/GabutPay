@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-5" data-aos="fade-up">
+        <div class="card border-0 shadow-lg">
+            <div class="card-body p-5 text-center">
+                <h1 class="h4 fw-bold">Pindai untuk Membayar</h1>
+                <p class="text-muted">Bayar kepada: <strong>{{ payment.merchant.email }}</strong></p>
+                
+                <div class="my-4">
+                    <img src="{{ qr_code }}" alt="QR Code Pembayaran" class="img-fluid rounded">
+                    <a href="{{ qr_code }}" download="gabutpay-qr-{{ payment.payment_id }}.png" class="btn btn-outline-primary btn-sm mt-3">
+                        <i class="bi bi-download"></i> Download QR
+                    </a>
+                </div>
+
+                <div class="text-center mb-4">
+                    <p class="text-muted mb-1">Jumlah:</p>
+                    <p class="display-4 fw-bold">Rp {{ "{:,.0f}".format(payment.amount / 100) }}</p>
+                </div>
+
+                <div class="alert alert-warning small">
+                    <i class="bi bi-clock"></i> QR code ini akan kedaluwarsa dalam 5 menit.
+                </div>
+
+                {% if current_user.is_authenticated and current_user.id != payment.merchant_id %}
+                <hr class="my-4">
+                <p>Anda login sebagai <strong>{{ current_user.email }}</strong>. Lanjutkan untuk membayar.</p>
+                <a href="{{ url_for('main.pay_page', signed_payment_id=payment.get_signed_id()) }}" class="btn btn-success btn-lg">
+                    <i class="bi bi-shield-check"></i> Konfirmasi & Bayar
+                </a>
+                {% elif current_user.is_authenticated and current_user.id == payment.merchant_id %}
+                <div class="alert alert-secondary small">
+                    Ini adalah QR code yang Anda buat. Anda tidak bisa membayar ke diri sendiri.
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <a href="{{ url_for('auth.login', next=request.url) }}">Login</a> untuk membayar.
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

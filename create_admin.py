@@ -7,6 +7,9 @@ from app.models import User
 def create_admin():
     """Fungsi untuk membuat user admin baru secara interaktif."""
     with app.app_context():
+        # Pastikan semua tabel sudah dibuat sebelum melakukan query
+        db.create_all()
+        
         print("--- Pembuatan Akun Admin Baru GabutPay ---")
         
         # 1. Meminta dan memvalidasi Email

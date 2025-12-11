@@ -4,21 +4,43 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-body">
-                <h2 class="card-title text-center">Masukkan Password Baru</h2>
-                <form method="POST" action="{{ url_for('auth.reset_token', token=request.view_args.token) }}">
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password Baru</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
+    <div class="col-md-6 col-lg-4" data-aos="fade-up">
+        <div class="card border-0 shadow-lg">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <h1 class="h4 fw-bold">Buat Password Baru</h1>
+                    <p class="text-muted">Pastikan password baru Anda kuat dan mudah diingat.</p>
+                </div>
+                
+                <form method="POST" action="{{ url_for('auth.reset_token', token=token) }}" novalidate>
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="form-floating mb-3">
+                        {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), id="floatingPassword", placeholder="Password Baru", required=True) }}
+                        {{ form.password.label(for="floatingPassword") }}
+                        {% if form.password.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.password.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
-                    <div class="mb-3">
-                        <label for="confirm_password" class="form-label">Konfirmasi Password Baru</label>
-                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                    
+                    <div class="form-floating mb-3">
+                        {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else ""), id="floatingConfirmPassword", placeholder="Konfirmasi Password Baru", required=True) }}
+                        {{ form.confirm_password.label(for="floatingConfirmPassword") }}
+                        {% if form.confirm_password.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.confirm_password.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Reset Password</button>
+
+                    <div class="d-grid mt-4">
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
                     </div>
                 </form>
             </div>

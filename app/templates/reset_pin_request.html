@@ -4,14 +4,19 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-body text-center">
-                <h2 class="card-title">Reset PIN Keamanan</h2>
-                <p>Kami akan mengirimkan link untuk mereset PIN ke email terdaftar Anda: <strong>{{ current_user.email }}</strong></p>
-                <form method="POST" action="{{ url_for('auth.reset_pin_request') }}">
-                    <button type="submit" class="btn btn-primary">Kirim Link Reset PIN</button>
-                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Batal</a>
+    <div class="col-md-8 col-lg-5" data-aos="fade-up">
+        <div class="card border-0 shadow-lg">
+            <div class="card-body p-5 text-center">
+                <i class="bi bi-envelope-check-fill fs-1 text-primary mb-3"></i>
+                <h1 class="h4 fw-bold">Reset PIN Keamanan</h1>
+                <p class="text-muted mt-3">Kami akan mengirimkan link untuk mereset PIN ke email terdaftar Anda:</p>
+                <p class="fw-bold">{{ current_user.email }}</p>
+                <form method="POST" action="{{ url_for('auth.reset_pin_request') }}" class="mt-4">
+                    {{ form.hidden_tag() }}
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
+                        <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary">Batal</a>
+                    </div>
                 </form>
             </div>
         </div>

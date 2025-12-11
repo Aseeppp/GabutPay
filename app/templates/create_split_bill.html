@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Buat Tagihan Patungan{% endblock %}
+
+{% block content %}
+<div class="container mt-4" data-aos="fade-up">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">Buat Tagihan Patungan Baru</h4>
+                </div>
+                <div class="card-body">
+                    <p class="card-text text-muted">Bagi tagihan dengan teman-temanmu. Masukkan total tagihan dan email peserta. Kami akan membaginya secara merata untuk saat ini.</p>
+                    <form method="POST" action="" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="form-floating mb-3">
+                            {{ form.title(class="form-control form-control-lg" + (" is-invalid" if form.title.errors else ""), id="floatingTitle", placeholder="Judul Tagihan") }}
+                            {{ form.title.label(for="floatingTitle") }}
+                            {% if form.title.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.title.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            {{ form.description(class="form-control textarea-md" + (" is-invalid" if form.description.errors else ""), id="floatingDescription", placeholder="Deskripsi (Opsional)") }}
+                            {{ form.description.label(for="floatingDescription") }}
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.description.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            {{ form.total_amount(class="form-control" + (" is-invalid" if form.total_amount.errors else ""), id="floatingAmount", placeholder="Total Tagihan") }}
+                            {{ form.total_amount.label(for="floatingAmount") }}
+                            {% if form.total_amount.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.total_amount.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <hr>
+
+                        <h5>Peserta</h5>
+                        <p class="text-muted small">Tambahkan email teman yang ingin Anda tagih. Anda otomatis termasuk sebagai peserta.</p>
+                        <div id="participant-list">
+                            {% for participant_field in form.participants %}
+                                <div class="input-group mb-2 participant-entry">
+                                    {{ participant_field(class="form-control" + (" is-invalid" if participant_field.errors else ""), placeholder="Email temanmu") }}
+                                    <button type="button" class="btn btn-outline-danger remove-participant-btn"><i class="bi bi-trash"></i></button>
+                                    {% if participant_field.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in participant_field.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <button type="button" id="add-participant-btn" class="btn btn-outline-primary btn-sm mt-2">
+                            <i class="bi bi-plus-circle"></i> Tambah Peserta
+                        </button>
+
+                        <div class="d-grid mt-4">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/split_bill_form.js') }}" defer></script>
+{% endblock %}

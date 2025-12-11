@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Tagihan Patungan Saya{% endblock %}
+
+{% block content %}
+<div class="container mt-4" data-aos="fade-up">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">Tagihan Patungan Saya</h1>
+        <a href="{{ url_for('main.create_split_bill') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle-fill me-1"></i> Buat Tagihan Baru
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            {% if bills %}
+                <div class="list-group">
+                    {% for bill in bills %}
+                        <a href="{{ url_for('main.split_bill_detail', bill_id=bill.id) }}" class="list-group-item list-group-item-action flex-column align-items-start">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ bill.title }}</h5>
+                                <small class="text-muted">{{ bill.created_at.strftime('%d %b %Y') }}</small>
+                            </div>
+                            <p class="mb-1">
+                                Total Tagihan: <strong>Rp {{ "{:,.0f}".format(bill.total_amount / 100) }}</strong>
+                            </p>
+                            <small>
+                                Status: 
+                                {% if bill.status == 'ACTIVE' %}
+                                    <span class="badge bg-warning text-dark">Aktif</span>
+                                {% elif bill.status == 'COMPLETED' %}
+                                    <span class="badge bg-success">Selesai</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ bill.status }}</span>
+                                {% endif %}
+                                <span class="ms-2">Dibuat oleh: <strong>{{ bill.creator.email if bill.creator_id != current_user.id else 'Anda' }}</strong></span>
+                            </small>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center p-5">
+                    <i class="bi bi-receipt-cutoff fs-1 text-muted"></i>
+                    <h4 class="mt-3">Tidak Ada Tagihan</h4>
+                    <p class="text-muted">Anda belum pernah membuat atau diundang ke tagihan patungan.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

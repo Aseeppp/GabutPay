@@ -1,26 +1,37 @@
 {% extends "base.html" %}
 
-{% block title %}Edit API Key{% endblock %}
+{% block title %}{{ title }}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title mb-0">Edit API Key</h2>
-            </div>
-            <div class="card-body">
-                <h5>Public Key</h5>
-                <p><code>{{ api_key.public_key }}</code></p>
-                <hr>
-                <form method="POST" action="{{ url_for('main.edit_key', key_id=api_key.id) }}">
-                    <div class="mb-3">
-                        <label for="webhook_url" class="form-label">URL Webhook</label>
-                        <input type="url" class="form-control" id="webhook_url" name="webhook_url" value="{{ api_key.webhook_url or '' }}" placeholder="https://tokoanda.com/webhook-receiver">
-                        <div class="form-text">URL ini akan menerima notifikasi khusus untuk pembayaran yang menggunakan API Key ini.</div>
+    <div class="col-md-8 col-lg-6" data-aos="fade-up">
+        <div class="card border-0 shadow-lg">
+            <div class="card-body p-5">
+                <div class="mb-4">
+                    <h1 class="h4 fw-bold">Edit API Key</h1>
+                    <p class="text-muted">Public Key: <code>{{ api_key.public_key }}</code></p>
+                </div>
+
+                <form method="POST" action="{{ url_for('main.edit_key', key_id=api_key.id) }}" novalidate>
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="form-floating mb-3">
+                        {{ form.webhook_url(class="form-control" + (" is-invalid" if form.webhook_url.errors else ""), id="floatingWebhook", placeholder="Webhook URL") }}
+                        {{ form.webhook_url.label(for="floatingWebhook") }}
+                        {% if form.webhook_url.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.webhook_url.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">URL ini akan menerima notifikasi untuk pembayaran yang dibuat menggunakan API Key ini.</div>
                     </div>
-                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Batal</a>
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
+                        <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary">Batal</a>
+                    </div>
                 </form>
             </div>
         </div>

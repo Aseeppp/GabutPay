@@ -4,36 +4,59 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card text-center">
-            <div class="card-header">
-                Konfirmasi Pembuatan API Key
-            </div>
-            <div class="card-body">
-                <h5 class="card-title">Biaya Pembuatan Key</h5>
-                <p class="display-4">Rp {{ "{:,.2f}".format(key_cost / 100) }}</p>
-                <p>Biaya ini akan dipotong dari saldo Anda.</p>
-                <hr>
-                <p>Saldo Anda saat ini: <strong>Rp {{ "{:,.2f}".format(current_user.balance / 100) }}</strong></p>
-                <p class="text-muted">Masukkan PIN keamanan Anda untuk melanjutkan.</p>
-                <form method="POST" action="{{ url_for('main.generate_key') }}" class="d-inline-block text-start">
-                    <div class="mb-3">
-                        <label for="store_name" class="form-label">Nama Toko</label>
-                        <input type="text" class="form-control" name="store_name" {% if is_first_key %}required{% else %}placeholder="Kosongkan untuk pakai nama toko utama"{% endif %}>
+    <div class="col-md-8 col-lg-5" data-aos="fade-up">
+        <div class="card border-0 shadow-lg">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <h1 class="h4 fw-bold">Konfirmasi Pembuatan API Key</h1>
+                </div>
+
+                <div class="text-center mb-4">
+                    <p class="text-muted mb-1">Biaya pembuatan key sebesar</p>
+                    <p class="display-4 fw-bold">Rp {{ "{:,.0f}".format(key_cost / 100) }}</p>
+                    <p class="text-muted">akan dipotong dari saldo Anda.</p>
+                </div>
+
+                <hr class="my-4">
+
+                <p class="text-center">Saldo Anda saat ini: <strong class="fw-bold">Rp {{ "{:,.0f}".format(current_user.balance / 100) }}</strong></p>
+
+                <form method="POST" action="{{ url_for('main.generate_key') }}" novalidate class="mt-4">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="form-floating mb-3">
+                        {{ form.store_name(class="form-control" + (" is-invalid" if form.store_name.errors else ""), id="floatingStoreName", placeholder="Nama Toko") }}
+                        {{ form.store_name.label(for="floatingStoreName") }}
+                        {% if form.store_name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.store_name.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                         {% if is_first_key %}<div class="form-text">Nama ini akan ditampilkan ke pelanggan Anda.</div>
                         {% else %}<div class="form-text">Anda bisa mengatur nama toko berbeda untuk key ini.</div>{% endif %}
                     </div>
-                    <div class="mb-3">
-                        <label for="pin" class="form-label">PIN Keamanan</label>
-                        <input type="password" inputmode="numeric" class="form-control form-control-lg" placeholder="6-Digit PIN" name="pin" required maxlength="6" pattern="[0-9]{6}">
+                    
+                    <div class="form-floating mb-3">
+                        {{ form.pin(class="form-control form-control-lg text-center pin-input-style" + (" is-invalid" if form.pin.errors else ""), id="floatingPin", placeholder="PIN Keamanan", required=True, autocomplete="one-time-code", type="password", inputmode="numeric", pattern="[0-9]*", maxlength="6") }}
+                        {{ form.pin.label(for="floatingPin") }}
+                        {% if form.pin.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.pin.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg">Konfirmasi & Bayar</button>
+
+                    <div class="d-grid mt-4">
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
                     </div>
                 </form>
             </div>
-            <div class="card-footer text-muted">
-                <a href="{{ url_for('main.dashboard') }}">Batal</a>
+            <div class="card-footer text-center py-3 bg-light border-0">
+                <a href="{{ url_for('main.dashboard') }}" class="text-decoration-none">Batal</a>
             </div>
         </div>
     </div>

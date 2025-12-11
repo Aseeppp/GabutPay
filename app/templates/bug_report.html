@@ -4,22 +4,43 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-body">
-                <h2 class="card-title text-center">Lapor Bug / Kirim Feedback</h2>
-                <p class="text-center text-muted">Kami sangat menghargai masukan Anda untuk membuat GabutPay lebih baik.</p>
-                <form method="POST" action="{{ url_for('main.bug_report') }}">
-                    <div class="mb-3">
-                        <label for="subject" class="form-label">Subjek</label>
-                        <input type="text" class="form-control" id="subject" name="subject" required>
+    <div class="col-md-8 col-lg-6" data-aos="fade-up">
+        <div class="card border-0 shadow-lg">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <h1 class="h4 fw-bold">Lapor Bug atau Kirim Feedback</h1>
+                    <p class="text-muted">Kami sangat menghargai masukan Anda untuk membuat GabutPay lebih baik.</p>
+                </div>
+                
+                <form method="POST" action="{{ url_for('main.bug_report') }}" novalidate>
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="form-floating mb-3">
+                        {{ form.subject(class="form-control" + (" is-invalid" if form.subject.errors else ""), id="floatingSubject", placeholder="Subjek") }}
+                        {{ form.subject.label(for="floatingSubject") }}
+                        {% if form.subject.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.subject.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Deskripsi</label>
-                        <textarea class="form-control" id="description" name="description" rows="6" required></textarea>
+                    
+                    <div class="form-floating mb-3">
+                        {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), id="floatingDescription", placeholder="Deskripsi", style="height: 150px") }}
+                        {{ form.description.label(for="floatingDescription") }}
+                        {% if form.description.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.description.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Kirim Laporan</button>
+                    
+                    <div class="d-grid mt-4">
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
                     </div>
                 </form>
             </div>

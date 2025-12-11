@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Detail Pembayaran{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6" data-aos="fade-up">
+        <div class="card border-0 shadow-lg">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    {% if payment.status == 'PAID' %}
+                        <i class="bi bi-check-circle-fill text-success status-icon"></i>
+                        <h1 class="h2 mt-3">Pembayaran Berhasil</h1>
+                    {% elif payment.status == 'FAILED' %}
+                        <i class="bi bi-x-circle-fill text-danger status-icon"></i>
+                        <h1 class="h2 mt-3">Pembayaran Gagal</h1>
+                    {% else %}
+                        <i class="bi bi-hourglass-split text-warning status-icon"></i>
+                        <h1 class="h2 mt-3">Menunggu Pembayaran</h1>
+                    {% endif %}
+                </div>
+
+                <div class="text-center mb-4">
+                    <p class="text-muted mb-1">Jumlah Transaksi</p>
+                    <p class="display-4 fw-bold">Rp {{ "{:,.0f}".format(payment.amount / 100) }}</p>
+                </div>
+
+                {% if payment.status == 'PAID' %}
+                    {% if current_user.id == payment.payer_id %}
+                    <!-- Payer's View -->
+                    <div class="alert alert-light">
+                        <h6 class="alert-heading text-center">Rincian Pembayaran Anda</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">Harga Produk: <span>Rp {{ "{:,.0f}".format(payment.amount / 100) }}</span></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">Biaya Layanan (Anda): <span>Rp {{ "{:,.0f}".format(payment.payer_fee / 100) }}</span></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent fw-bold">Total Terpotong: <span class="fs-5">Rp {{ "{:,.0f}".format((payment.amount + payment.payer_fee) / 100) }}</span></li>
+                        </ul>
+                    </div>
+                    {% elif current_user.id == payment.merchant_id %}
+                    <!-- Merchant's View -->
+                    <div class="alert alert-light">
+                        <h6 class="alert-heading text-center">Rincian Pendapatan</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">Harga Produk: <span>Rp {{ "{:,.0f}".format(payment.amount / 100) }}</span></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">Biaya Admin: <span class="text-danger">- Rp {{ "{:,.0f}".format(payment.merchant_fee / 100) }}</span></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent fw-bold">Dana Diterima: <span class="fs-5 text-success">Rp {{ "{:,.0f}".format((payment.amount - payment.merchant_fee) / 100) }}</span></li>
+                        </ul>
+                    </div>
+                    {% endif %}
+                {% endif %}
+
+                <ul class="list-group list-group-flush mt-4">
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        Status
+                        <span>
+                            {% if payment.status == 'PAID' %}
+                                <span class="badge bg-success">BERHASIL</span>
+                            {% elif payment.status == 'FAILED' %}
+                                <span class="badge bg-danger">GAGAL</span>
+                            {% else %}
+                                <span class="badge bg-warning">PENDING</span>
+                            {% endif %}
+                        </span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        Tanggal
+                        <span>{{ payment.created_at.strftime('%d %b %Y') }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        Waktu
+                        <span>{{ payment.created_at.strftime('%H:%M:%S') }} UTC</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        ID Transaksi
+                        <code class="fs-6">{{ payment.payment_id }}</code>
+                    </li>
+                    {% if payment.payer %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        Dibayar oleh
+                        <span>{{ payment.payer.email }}</span>
+                    </li>
+                    {% endif %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        Penerima
+                        <span>{{ payment.merchant.email }}</span>
+                    </li>
+                </ul>
+                
+                <div class="d-grid mt-5">
+                    <a href="{{ url_for('main.history') }}" class="btn btn-outline-primary">Kembali ke Riwayat</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
