@@ -17,8 +17,11 @@
     <div class="col-lg-7">
         <!-- Modify Balance -->
         <div class="card shadow-sm mb-4" data-aos="fade-up" data-aos-delay="100">
-            <div class="card-header bg-transparent">
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Ubah Saldo</h5>
+                <span class="badge {{ 'bg-success' if user.is_partner else 'bg-secondary' }}">
+                    {{ 'PARTNER' if user.is_partner else 'REGULAR' }}
+                </span>
             </div>
             <div class="card-body">
                 <p>Saldo saat ini: <strong class="fs-4 fw-bold">Rp {{ "{:,.0f}".format(user.balance / 100) }}</strong></p>
@@ -53,6 +56,59 @@
                     
                     {{ modify_balance_form.submit(class="btn btn-primary") }}
                 </form>
+            </div>
+        </div>
+
+        <!-- API Key Inbound Config (Partner Only) -->
+        <div class="card shadow-sm mb-4" data-aos="fade-up" data-aos-delay="150">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">API Keys & Inbound Configuration</h5>
+            </div>
+            <div class="card-body">
+                {% if user.api_keys %}
+                    {% for key in user.api_keys %}
+                    <div class="border rounded p-3 mb-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <code class="text-primary fw-bold">{{ key.public_key }}</code>
+                                <small class="text-muted d-block mt-1">Store: {{ key.store_name or 'N/A' }}</small>
+                            </div>
+                            <span class="badge {{ 'bg-success' if key.is_inbound_enabled else 'bg-secondary' }}">
+                                Inbound: {{ 'Enabled' if key.is_inbound_enabled else 'Disabled' }}
+                            </span>
+                        </div>
+                        
+                        <form action="{{ url_for('admin.update_inbound_config', key_id=key.id) }}" method="POST" class="mt-3 pt-3 border-top">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="row g-3">
+
+                                <div class="col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="is_inbound_enabled" id="inbound_{{key.id}}" {{ 'checked' if key.is_inbound_enabled }}>
+                                        <label class="form-check-label fw-bold" for="inbound_{{key.id}}">Aktifkan Inbound API</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-7">
+                                    <label class="form-label small mb-1">Allowed IPs (Koma-separated)</label>
+                                    <input type="text" name="allowed_ips" class="form-control form-control-sm" value="{{ key.allowed_ips or '' }}" placeholder="e.g. 127.0.0.1, 8.8.8.8">
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label small mb-1">Daily Limit (IDR)</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">Rp</span>
+                                        <input type="number" name="daily_limit" class="form-control" value="{{ key.daily_limit / 100 }}" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-dark btn-sm">Update Config</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted mb-0">Pengguna tidak memiliki API Key.</p>
+                {% endif %}
             </div>
         </div>
 
@@ -92,6 +148,23 @@
     </div>
 
     <div class="col-lg-5">
+        <!-- Partner Access -->
+        <div class="card shadow-sm mb-4 border-primary" data-aos="fade-up" data-aos-delay="250">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Akses Partner</h5>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted">Hanya Partner yang bisa menggunakan endpoint Inbound Transfer API untuk "menambah saldo" ke sistem GabutPay.</p>
+                <form action="{{ url_for('admin.toggle_partner', user_id=user.id) }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-{{ 'danger' if user.is_partner else 'primary' }} w-100">
+
+                        {{ 'Cabut Status Partner' if user.is_partner else 'Jadikan Partner (Inbound)' }}
+                    </button>
+                </form>
+            </div>
+        </div>
+
         <!-- Delete Account -->
         <div class="card border-danger shadow-sm" data-aos="fade-up" data-aos-delay="300">
             <div class="card-header bg-danger text-white">

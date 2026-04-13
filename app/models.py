@@ -20,6 +20,7 @@ class User(db.Model, UserMixin):
     otp_expiry = db.Column(db.DateTime, nullable=True)
     registration_ip = db.Column(db.String(45), nullable=True)
     is_admin = db.Column(db.Boolean, nullable=False, default=False)
+    is_partner = db.Column(db.Boolean, nullable=False, default=False) # Authorized for Inbound
     banned_until = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     last_seen = db.Column(db.DateTime, nullable=True)
@@ -71,6 +72,12 @@ class APIKey(db.Model):
     webhook_secret_encrypted = db.Column(db.String(512), nullable=True)
     webhook_url = db.Column(db.String(255), nullable=True)
     store_name = db.Column(db.String(100), nullable=True)
+    
+    # Inbound Security Fields
+    is_inbound_enabled = db.Column(db.Boolean, nullable=False, default=False)
+    allowed_ips = db.Column(db.Text, nullable=True) # Comma-separated list of allowed IPs
+    daily_limit = db.Column(db.Integer, nullable=False, default=10000000) # Default 100k IDR (in cents)
+    
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     
     # Foreign Key to link to a User
@@ -78,6 +85,29 @@ class APIKey(db.Model):
 
     def __repr__(self):
         return f"APIKey('{self.public_key}')"
+
+class InboundLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    partner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    api_key_id = db.Column(db.Integer, db.ForeignKey('api_key.id'), nullable=False)
+    recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    external_id = db.Column(db.String(100), nullable=False) # Partner's Transaction ID for Idempotency
+    amount = db.Column(db.Integer, nullable=False)
+    status = db.Column(db.String(20), nullable=False, default='SUCCESS') # SUCCESS, FAILED
+    request_ip = db.Column(db.String(45), nullable=True)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    # Unique constraint for idempotency: Partner + External ID
+    __table_args__ = (db.UniqueConstraint('partner_id', 'external_id', name='_partner_external_id_uc'),)
+
+    partner = db.relationship('User', foreign_keys=[partner_id])
+    recipient = db.relationship('User', foreign_keys=[recipient_id])
+    api_key = db.relationship('APIKey')
+
+    def __repr__(self):
+        return f"<InboundLog {self.external_id} - {self.amount}>"
+
 
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)

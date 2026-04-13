@@ -204,14 +204,20 @@ def transfer():
             return redirect(url_for('main.transfer'))
 
         try:
-            # Lock rows for update
-            sender = db.session.query(User).filter_by(id=current_user.id).with_for_update().one()
-            recipient = db.session.query(User).filter(User.email == recipient_email, User.id != sender.id).with_for_update().one_or_none()
-            
-            if not recipient:
+            # 1. FIND RECIPIENT
+            recipient_stub = User.query.filter(User.email == recipient_email, User.id != current_user.id).first()
+            if not recipient_stub:
                 flash('Pengguna penerima tidak ditemukan.', 'danger')
-                db.session.rollback()
                 return redirect(url_for('main.transfer'))
+
+            # 2. CONSISTENT LOCKING ORDER to prevent Deadlock
+            # Always lock the smaller ID first
+            if current_user.id < recipient_stub.id:
+                sender = db.session.query(User).filter_by(id=current_user.id).with_for_update().one()
+                recipient = db.session.query(User).filter_by(id=recipient_stub.id).with_for_update().one()
+            else:
+                recipient = db.session.query(User).filter_by(id=recipient_stub.id).with_for_update().one()
+                sender = db.session.query(User).filter_by(id=current_user.id).with_for_update().one()
 
             # --- New Fee Logic ---
             base_amount = int(form.amount.data * 100)
@@ -574,25 +580,38 @@ def split_bill_detail(bill_id):
 @main_bp.route('/split-bill/pay/<int:participant_id>', methods=['POST'])
 @login_required
 def pay_split_bill_participant(participant_id):
-    participant = SplitBillParticipant.query.get_or_404(participant_id)
-    bill = participant.split_bill
+    # 1. INITIAL FIND (No lock yet)
+    participant_stub = SplitBillParticipant.query.get_or_404(participant_id)
+    bill_id = participant_stub.split_bill_id
 
-    # Security & State Checks
-    if participant.participant_user_id != current_user.id:
+    # Security check: can't pay for someone else
+    if participant_stub.participant_user_id != current_user.id:
         from flask import abort
-        abort(403) # Can't pay for someone else
-    if participant.status != 'PENDING':
-        flash('Tagihan ini sudah lunas atau sedang diproses.', 'warning')
-        return redirect(url_for('main.split_bill_detail', bill_id=bill.id))
-    if bill.status != 'ACTIVE':
-        flash('Sesi patungan ini sudah tidak aktif.', 'warning')
-        return redirect(url_for('main.split_bill_detail', bill_id=bill.id))
-
-    # TODO: Add PIN authorization form/modal for better security
+        abort(403)
 
     try:
-        payer = db.session.query(User).filter_by(id=current_user.id).with_for_update().one()
-        creator = db.session.query(User).filter_by(id=bill.creator_id).with_for_update().one()
+        # 2. LOCK PARTICIPANT & BILL to prevent double payment
+        participant = db.session.query(SplitBillParticipant).filter_by(id=participant_id).with_for_update().one()
+        bill = db.session.query(SplitBill).filter_by(id=bill_id).with_for_update().one()
+
+        # 3. STATE CHECKS (inside lock)
+        if participant.status != 'PENDING':
+            flash('Tagihan ini sudah lunas atau sedang diproses.', 'warning')
+            return redirect(url_for('main.split_bill_detail', bill_id=bill.id))
+        if bill.status != 'ACTIVE':
+            flash('Sesi patungan ini sudah tidak aktif.', 'warning')
+            return redirect(url_for('main.split_bill_detail', bill_id=bill.id))
+
+        # 4. CONSISTENT LOCKING ORDER for balances
+        payer_id = current_user.id
+        creator_id = bill.creator_id
+        
+        if payer_id < creator_id:
+            payer = db.session.query(User).filter_by(id=payer_id).with_for_update().one()
+            creator = db.session.query(User).filter_by(id=creator_id).with_for_update().one()
+        else:
+            creator = db.session.query(User).filter_by(id=creator_id).with_for_update().one()
+            payer = db.session.query(User).filter_by(id=payer_id).with_for_update().one()
 
         if payer.balance < participant.amount_due:
             flash('Saldo Anda tidak mencukupi untuk membayar tagihan ini.', 'danger')
@@ -1099,6 +1118,181 @@ req.end();
 
                                 </code></pre>
                            ''')
+
+@main_bp.route('/docs/inbound')
+def docs_inbound():
+    return render_template('static_page.html', title='Dokumentasi Inbound Partner',
+                           subtitle='Panduan teknis untuk integrasi Inbound Transfer bagi partner resmi GabutPay.',
+                           content='''
+                                <h3 id="pendahuluan">Pendahuluan</h3>
+                                <p>API Inbound Transfer memungkinkan partner resmi GabutPay untuk menambahkan saldo ke akun pengguna secara otomatis dan terprogram. Layanan ini dirancang untuk integrasi sistem-ke-sistem dengan tingkat keamanan tinggi.</p>
+                                <p>Base URL: <code>https://gabutpay.com/api/v1</code></p>
+
+                                <hr class="my-4">
+
+                                <h3 id="keamanan">1. Protokol Keamanan</h3>
+                                <p>Untuk menjamin keamanan transaksi, kami menerapkan tiga lapisan perlindungan wajib:</p>
+                                <ul>
+                                    <li>
+                                        <strong>HMAC Signature:</strong> Setiap permintaan harus disertai tanda tangan digital menggunakan algoritma <strong>HMAC-SHA256</strong>. 
+                                        <em>String-to-sign</em> dibentuk dengan format: <code>{TIMESTAMP}.{RAW_JSON_BODY}</code>.
+                                    </li>
+                                    <li>
+                                        <strong>IP Whitelisting:</strong> Server kami hanya akan memproses permintaan yang berasal dari alamat IP yang telah didaftarkan melalui Dashboard Admin GabutPay.
+                                    </li>
+                                    <li>
+                                        <strong>Idempotensi:</strong> Partner wajib mengirimkan <code>external_id</code> yang unik. Jika sistem kami menerima permintaan dengan ID yang sama, kami akan mengembalikan data transaksi yang sudah ada untuk mencegah duplikasi saldo.
+                                    </li>
+                                </ul>
+
+                                <hr class="my-4">
+
+                                <h3 id="request-parameters">2. Parameter Permintaan</h3>
+                                <p>Endpoint: <code>POST /api/v1/inbound-transfer</code></p>
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Tipe</th>
+                                            <th>Wajib</th>
+                                            <th>Deskripsi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>amount</code></td>
+                                            <td>Integer</td>
+                                            <td>Ya</td>
+                                            <td>Jumlah transfer dalam satuan <strong>sen</strong>. Contoh: <code>100000</code> untuk Rp 1.000,00.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>external_id</code></td>
+                                            <td>String</td>
+                                            <td>Ya</td>
+                                            <td>ID unik dari sistem Anda (misal: ID transaksi internal) untuk referensi dan idempotensi.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>recipient_email</code></td>
+                                            <td>String</td>
+                                            <td>Ya</td>
+                                            <td>Alamat email pengguna GabutPay yang akan menerima dana.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <hr class="my-4">
+
+                                <h3 id="contoh-kode">3. Contoh Implementasi</h3>
+                                
+                                <h4>Python (Requests)</h4>
+                                <pre class="bg-dark text-light p-3 rounded"><code>
+import hmac
+import hashlib
+import time
+import json
+import requests
+
+# Konfigurasi Partner
+SECRET_KEY = "partner_sk_..."
+PUBLIC_KEY = "partner_pk_..."
+URL = "https://gabutpay.com/api/v1/inbound-transfer"
+
+payload = {
+    "amount": 100000,
+    "external_id": "PARTNER-TRX-001",
+    "recipient_email": "user@example.com"
+}
+
+# Serialize payload tanpa spasi (compact) untuk integritas signature
+raw_body = json.dumps(payload, separators=(',', ':')).encode('utf-8')
+timestamp = str(int(time.time()))
+
+# Format: {TIMESTAMP}.{RAW_BODY}
+string_to_sign = timestamp.encode('utf-8') + b"." + raw_body
+
+# Hitung HMAC-SHA256
+signature = hmac.new(
+    SECRET_KEY.encode('utf-8'),
+    string_to_sign,
+    hashlib.sha256
+).hexdigest()
+
+headers = {
+    'Content-Type': 'application/json',
+    'X-PUBLIC-KEY': PUBLIC_KEY,
+    'X-REQUEST-TIMESTAMP': timestamp,
+    'X-SIGNATURE': signature
+}
+
+try:
+    response = requests.post(URL, data=raw_body, headers=headers)
+    print("Status Code:", response.status_code)
+    print("Response JSON:", response.json())
+except Exception as e:
+    print("Error:", e)
+                                </code></pre>
+
+                                <h4>Node.js (Native HTTPS)</h4>
+                                <pre class="bg-dark text-light p-3 rounded"><code>
+const crypto = require('crypto');
+const https = require('https');
+
+const SECRET_KEY = 'partner_sk_...';
+const PUBLIC_KEY = 'partner_pk_...';
+const HOST = 'gabutpay.com';
+const PATH = '/api/v1/inbound-transfer';
+
+const payloadObj = {
+    amount: 100000,
+    external_id: 'PARTNER-TRX-001',
+    recipient_email: 'user@example.com'
+};
+
+// Pastikan tidak ada spasi tambahan dalam serialisasi JSON
+const rawBody = JSON.stringify(payloadObj);
+const timestamp = Math.floor(Date.now() / 1000).toString();
+
+// Format: {TIMESTAMP}.{RAW_BODY}
+const stringToSign = `${timestamp}.${rawBody}`;
+
+const signature = crypto
+    .createHmac('sha256', SECRET_KEY)
+    .update(stringToSign)
+    .digest('hex');
+
+const options = {
+    hostname: HOST,
+    path: PATH,
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-PUBLIC-KEY': PUBLIC_KEY,
+        'X-REQUEST-TIMESTAMP': timestamp,
+        'X-SIGNATURE': signature,
+        'Content-Length': Buffer.byteLength(rawBody)
+    }
+};
+
+const req = https.request(options, (res) => {
+    let data = '';
+    res.on('data', (chunk) => { data += chunk; });
+    res.on('end', () => {
+        console.log('Status Code:', res.statusCode);
+        try {
+            console.log('Response JSON:', JSON.parse(data));
+        } catch (e) {
+            console.error('Failed to parse JSON response:', data);
+        }
+    });
+});
+
+req.on('error', (error) => { console.error('Error:', error); });
+req.write(rawBody);
+req.end();
+req.end();
+                                </code></pre>
+                           ''')
+
 
 @main_bp.route('/changelog')
 def changelog():

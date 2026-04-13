@@ -78,12 +78,14 @@ def create_app():
         'default-src': [
             '\'self\'',
             'https://cdn.jsdelivr.net',
-            'https://unpkg.com' # Needed for AOS
+            'https://unpkg.com', # Needed for AOS
+            'https://static.cloudflareinsights.com' # Cloudflare analytics
         ],
         'script-src': [
             '\'self\'',
             'https://cdn.jsdelivr.net',
             'https://unpkg.com', # Needed for AOS
+            'https://static.cloudflareinsights.com', # Cloudflare analytics
             '\'sha256-WE9cek3jMYEHymorbohXeZBLX/ZYX9M8DsphH4pW764=\'' # Hash for inline theme-setter script
         ],
         'style-src': [

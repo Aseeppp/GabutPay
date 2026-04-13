@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from flask import Blueprint, render_template, flash, redirect, url_for, abort, request
 from flask_login import login_required, current_user, logout_user
 from . import db, bcrypt
-from .models import User, Transaction
+from .models import User, Transaction, APIKey
 from decimal import Decimal
 from .forms import ModifyBalanceForm, ManageBanForm, DeleteUserForm, WithdrawRevenueForm
 from sqlalchemy import func
@@ -96,11 +96,14 @@ def modify_balance(user_id):
         user.balance += amount_in_cents
         
         tx_type = 'ADMIN_CREDIT' if amount_in_cents > 0 else 'ADMIN_DEBIT'
+        
+        # Consistent with other parts: Debit is negative, Credit is positive
+        tx_amount = amount_in_cents
 
         adj_tx = Transaction(
             user_id=user.id,
             transaction_type=tx_type,
-            amount=abs(amount_in_cents),
+            amount=tx_amount,
             description=f'Admin: {reason}'
         )
         db.session.add(adj_tx)
@@ -231,4 +234,35 @@ def withdraw_revenue():
         flash('Input tidak valid. Periksa kembali jumlah dan PIN Anda.', 'danger')
 
     return redirect(url_for('admin.revenue'))
+
+@admin_bp.route('/user/<int:user_id>/toggle-partner', methods=['POST'])
+@admin_required
+def toggle_partner(user_id):
+    user = User.query.get_or_404(user_id)
+    user.is_partner = not user.is_partner
+    db.session.commit()
+    status = "Partner" if user.is_partner else "Biasa"
+    flash(f'Status {user.email} diubah menjadi {status}.', 'success')
+    return redirect(url_for('admin.edit_user', user_id=user_id))
+
+@admin_bp.route('/key/<int:key_id>/update-inbound', methods=['POST'])
+@admin_required
+def update_inbound_config(key_id):
+    api_key = APIKey.query.get_or_404(key_id)
+    
+    # Update fields
+    api_key.is_inbound_enabled = 'is_inbound_enabled' in request.form
+    api_key.allowed_ips = request.form.get('allowed_ips', '').strip()
+    
+    try:
+        limit_in_cents = int(Decimal(request.form.get('daily_limit', '100000')) * 100)
+        api_key.daily_limit = limit_in_cents
+    except:
+        flash('Limit harian tidak valid.', 'danger')
+        return redirect(url_for('admin.edit_user', user_id=api_key.user_id))
+
+    db.session.commit()
+    flash(f'Konfigurasi Inbound untuk key {api_key.public_key} berhasil diperbarui.', 'success')
+    return redirect(url_for('admin.edit_user', user_id=api_key.user_id))
+
 
