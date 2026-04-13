@@ -1,145 +1,130 @@
-# GabutPay: Simulasi E-Wallet & Payment Gateway
+# GabutPay: Solusi Simulasi E-Wallet dan Payment Gateway
 
-GabutPay adalah proyek aplikasi web berbasis Python dan Flask yang menyimulasikan platform finansial dengan dua fungsi utama: sebagai **dompet digital (e-wallet)** untuk pengguna individu dan sebagai **payment gateway** untuk merchant atau developer. Proyek ini dirancang sebagai studi kasus dan portofolio untuk mendemonstrasikan implementasi fitur-fitur finansial dalam lingkungan yang aman dan terkontrol.
+GabutPay adalah platform simulasi keuangan berbasis web yang dirancang menggunakan kerangka kerja **Python Flask**. Proyek ini berfungsi ganda sebagai dompet digital (*e-wallet*) bagi pengguna umum dan sebagai gerbang pembayaran (*payment gateway*) bagi pengembang atau mitra bisnis. 
 
-Aplikasi ini dibangun dengan fokus pada arsitektur yang modular, praktik keamanan fundamental, dan pengalaman pengguna yang intuitif.
+Tujuan utama proyek ini adalah untuk mendemonstrasikan implementasi sistem transaksi keuangan yang aman, menangani integrasi API antar sistem, serta mengelola integritas data dalam lingkungan yang terdistribusi.
 
-## Konsep Inti
+---
 
-- **Fungsi Ganda**: Pengguna dapat mendaftar, mengelola saldo, dan melakukan transaksi layaknya pengguna e-wallet. Secara bersamaan, setiap pengguna dapat bertindak sebagai *merchant* dengan membuat API Key untuk mengintegrasikan pembayaran pada aplikasi atau situs web eksternal.
-- **Simulasi Realistis**: Meskipun seluruh transaksi bersifat simulasi dan tidak melibatkan uang nyata, alur prosesnya dirancang untuk meniru cara kerja sistem pembayaran modern, termasuk penerapan biaya layanan (fees) dan mekanisme transfer dana antar pihak.
-- **Keamanan sebagai Prioritas**: Aplikasi ini mengimplementasikan praktik keamanan esensial, seperti hashing untuk kredensial, verifikasi email, otentikasi transaksi dengan PIN, dan proteksi endpoint API menggunakan signature HMAC.
-- **API-Driven**: Fungsionalitas payment gateway diekspos melalui REST API yang terdokumentasi, memungkinkan developer untuk berintegrasi secara terprogram.
+## 1. Konsep dan Cara Kerja
 
-## Fitur Utama
+GabutPay beroperasi dengan membagi peran pengguna menjadi tiga kategori utama:
 
-### Untuk Pengguna (Fungsi E-Wallet)
-- **Manajemen Akun**: Registrasi pengguna baru dengan verifikasi One-Time Password (OTP) melalui email, serta proses login yang aman.
-- **Manajemen Saldo**: Pengguna memiliki saldo virtual yang dapat digunakan untuk berbagai transaksi. Riwayat semua transaksi tercatat dan dapat diakses.
-- **Transfer Dana**: Kemampuan untuk mentransfer saldo ke sesama pengguna GabutPay secara instan, diamankan dengan otentikasi PIN.
-- **Pembayaran QR Code**:
-    - Membuat permintaan pembayaran dengan menghasilkan QR code dinamis.
-    - Memindai QR code menggunakan kamera perangkat atau dari galeri untuk melakukan pembayaran.
-- **Tagihan Patungan (Split Bill)**:
-    - Membuat sesi tagihan bersama dengan beberapa partisipan.
-    - Sistem secara otomatis membagi total tagihan dan mengelola status pembayaran setiap partisipan.
-- **Notifikasi Push**: Menerima notifikasi real-time untuk aktivitas penting seperti transfer masuk dan pembayaran berhasil (memerlukan persetujuan pengguna).
-- **Sistem Pencapaian (Achievements)**: Mendapatkan lencana (badges) untuk pencapaian tertentu, seperti melakukan transfer pertama atau mencapai streak login.
-- **Keamanan Akun**: Fitur untuk mengatur atau mereset PIN keamanan dan password akun melalui tautan yang dikirim ke email.
+1.  **Pengguna Reguler (E-Wallet):** Pengguna dapat mengelola saldo virtual, melakukan transfer antar pengguna menggunakan PIN, membayar tagihan melalui QR Code, serta mengelola tagihan bersama (*Split Bill*).
+2.  **Merchant (Payment Gateway):** Setiap pengguna dapat mengaktifkan fitur Merchant dengan membuat API Key. Merchant dapat mengintegrasikan GabutPay ke aplikasi eksternal untuk menerima pembayaran melalui link pembayaran atau QR Code dinamis.
+3.  **Partner (Inbound Support):** Pengguna dengan status khusus (*Partner*) yang memiliki akses ke Inbound API. Fitur ini memungkinkan mitra untuk menambahkan saldo ke akun pengguna GabutPay secara otomatis melalui integrasi server-to-server.
 
-### Untuk Developer (Fungsi Payment Gateway)
-- **Dasbor Merchant**: Halaman khusus untuk mengelola API Key, melihat statistik, dan mengkonfigurasi webhook.
-- **Manajemen API Key**: Kemampuan untuk membuat, mereset, dan menghapus API Key. Pembuatan key pertama bersifat gratis, sedangkan key berikutnya dikenakan biaya yang dipotong dari saldo.
-- **Integrasi API**:
-    - Endpoint RESTful untuk membuat sesi pembayaran (`create-payment`).
-    - Mendukung pembuatan **link pembayaran** atau **QR code dinamis** secara on-demand melalui API.
-- **Notifikasi Webhook**: Merchant dapat menyediakan URL webhook untuk menerima notifikasi server-to-server (HTTP POST) secara otomatis ketika status pembayaran berubah (misalnya, dari `PENDING` menjadi `PAID`).
-- **Dokumentasi API Komprehensif**: Menyediakan panduan teknis yang detail (/docs) mengenai cara otentikasi, daftar endpoint, format request/response, dan contoh kode dalam berbagai bahasa pemrograman (Python, Node.js).
+---
 
-## Arsitektur dan Teknologi
+## 2. Fitur Utama Sistem
 
-- **Backend**: Python 3, Flask
-- **Database**: PostgreSQL (direkomendasikan untuk produksi), SQLite (untuk development). Menggunakan Flask-SQLAlchemy sebagai ORM dan Flask-Migrate untuk manajemen skema.
-- **Keamanan**:
-    - Hashing: Flask-Bcrypt untuk password dan PIN.
-    - Serializer: `itsdangerous` untuk token yang aman (reset password, link pembayaran).
-    - Proteksi API: HMAC-SHA256 untuk request signature.
-- **Frontend**:
-    - Templating: Jinja2.
-    - Framework CSS: Bootstrap 5.
-    - Interaktivitas: Vanilla JavaScript untuk fitur seperti scanner QR dan notifikasi.
-- **Layanan Email**: Flask-Mail untuk pengiriman email transaksional (OTP, notifikasi reset).
-- **Deployment**: Proyek ini siap untuk di-deploy pada platform cloud modern seperti Railway, Heroku, atau DigitalOcean.
+### A. Keamanan Transaksi
+*   **HMAC-SHA256 Signature:** Menjamin integritas permintaan API. Setiap *request* harus menyertakan tanda tangan digital yang diverifikasi di sisi server.
+*   **IP Whitelisting:** Membatasi akses API Key Partner hanya dari alamat IP yang telah didaftarkan.
+*   **Idempotency Key:** Menggunakan `external_id` pada transaksi inbound untuk mencegah duplikasi penambahan saldo jika terjadi pengiriman ulang permintaan API.
+*   **Row-Level Locking:** Mengimplementasikan mekanisme penguncian basis data (`with_for_update`) untuk mencegah kesalahan perhitungan saldo akibat transaksi yang bersamaan (*race condition*).
 
-## Instalasi dan Konfigurasi Lokal
+### B. Fungsionalitas Pengguna
+*   **Transfer & Split Bill:** Pengiriman dana instan antar pengguna dan sistem manajemen patungan otomatis.
+*   **Dynamic QR Code:** Pemindaian dan pembuatan QR Code standar untuk proses pembayaran yang cepat.
+*   **Notifikasi Real-time:** Integrasi *Web Push Notification* untuk menginformasikan setiap aktivitas transaksi kepada pengguna.
 
-Untuk menjalankan proyek ini di lingkungan development, ikuti langkah-langkah berikut:
+### C. Integrasi Developer
+*   **Webhooks:** Pengiriman notifikasi otomatis dari server GabutPay ke server Merchant ketika status pembayaran berubah menjadi lunas (*PAID*).
+*   **Dokumentasi API Internal:** Tersedia panduan teknis lengkap di rute `/docs` yang mencakup contoh kode dalam berbagai bahasa pemrograman.
 
-#### 1. Prasyarat
-- Python 3.8 atau lebih tinggi.
-- `pip` dan `venv`.
-- Git.
+---
 
-#### 2. Setup Proyek
+## 3. Persyaratan Sistem
+
+Sebelum melakukan instalasi, pastikan sistem Anda memenuhi kriteria berikut:
+*   **Python:** Versi 3.8 atau lebih tinggi.
+*   **Database:** PostgreSQL (Direkomendasikan) atau SQLite untuk keperluan pengembangan.
+*   **Email Server:** Akun SMTP (seperti Gmail App Password) untuk layanan OTP dan notifikasi.
+
+---
+
+## 4. Panduan Instalasi dan Konfigurasi
+
+### Langkah 1: Persiapan Lingkungan
+Unduh repositori dan siapkan lingkungan virtual Python:
 ```bash
-# Clone repositori dari GitHub
 git clone https://github.com/Aseeppp/GabutPay.git
 cd GabutPay
-
-# Buat dan aktifkan virtual environment
 python -m venv venv
-source venv/bin/activate  # Untuk Linux/macOS
-# venv\Scripts\activate  # Untuk Windows
+source venv/bin/activate  # Linux/macOS
+# venv\Scripts\activate   # Windows
+```
 
-# Install semua dependensi yang dibutuhkan
+### Langkah 2: Instalasi Dependensi
+Instal seluruh pustaka yang diperlukan:
+```bash
 pip install -r requirements.txt
 ```
 
-#### 3. Konfigurasi Environment
-Buat file `.env` di direktori root proyek. File ini akan menyimpan semua konfigurasi sensitif. Salin konten dari contoh di bawah dan sesuaikan nilainya.
-
+### Langkah 3: Konfigurasi Environment (`.env`)
+Buat file bernama `.env` di direktori utama dan lengkapi konfigurasi sesuai contoh berikut:
 ```ini
-# Kunci rahasia untuk sesi Flask dan enkripsi. Ganti dengan string acak yang kuat.
-SECRET_KEY=ganti_dengan_kunci_rahasia_yang_sangat_aman
+# =========================
+# APP CONFIG
+# =========================
+SECRET_KEY='kunci-rahasia-super-aman-jangan-disebar-luaskan-ya'
+ENCRYPTION_KEY='kunci_rahasia_super_aman_anda'
 
-# Konfigurasi Database (pilih salah satu)
-# Untuk PostgreSQL (rekomendasi)
-DATABASE_URL="postgresql://user:password@host:port/dbname"
-# Untuk SQLite (development)
-# DATABASE_URL="sqlite:///instance/gabutpay.db"
+# =========================
+# DATABASE
+# =========================
+SQLALCHEMY_DATABASE_URI='sqlite:///gabutpay.db'
 
-# Konfigurasi Server Email (contoh menggunakan Gmail)
-MAIL_SERVER=smtp.gmail.com
+# =========================
+# EMAIL CONFIG
+# =========================
+MAIL_SERVER='smtp.gmail.com'
 MAIL_PORT=587
 MAIL_USE_TLS=True
-MAIL_USERNAME=alamat.email.anda@gmail.com
-MAIL_PASSWORD=password_aplikasi_gmail_anda # Gunakan App Password, bukan password utama
+MAIL_USERNAME='emailanda@gmail.com'
+MAIL_PASSWORD='password_aplikasi_anda'
+ADMIN_EMAIL='emailanda@gmail.com'
 
-# Alamat email untuk menerima laporan bug
-ADMIN_EMAIL=email_admin_anda@example.com
-
-# Konfigurasi VAPID untuk Notifikasi Push (opsional)
-# Anda bisa generate kunci ini menggunakan library seperti py-vapid
-VAPID_PRIVATE_KEY=kunci_privat_vapid
-VAPID_PUBLIC_KEY=kunci_publik_vapid
-VAPID_CLAIM_EMAIL=mailto:alamat.email.anda@gmail.com
-
-# Biaya-biaya (dalam sen)
-KEY_COST=10000 # Biaya pembuatan API Key (Rp 100.00)
-PAYER_FEE_TRANSFER_PERCENT=0.005 # 0.5%
-PAYER_FEE_LINK_PERCENT=0.01 # 1%
-PAYER_FEE_QR_PERCENT=0.007 # 0.7%
-MERCHANT_FEE_PERCENT=0.015 # 1.5%
+# =========================
+# PUSH NOTIFICATION (VAPID)
+# =========================
+VAPID_PRIVATE_KEY='vapid_private_key'
+VAPID_PUBLIC_KEY='vapid_public_key'
 ```
 
-#### 4. Inisialisasi Database
-Jalankan perintah berikut untuk membuat skema database berdasarkan model yang ada.
-
+### Langkah 4: Inisialisasi Basis Data
+Jalankan migrasi untuk menyusun struktur tabel di basis data:
 ```bash
-# Inisialisasi migrasi (hanya dijalankan sekali saat pertama kali)
-flask db init
-
-# Buat file migrasi awal
-flask db migrate -m "Initial migration"
-
-# Terapkan migrasi ke database
 flask db upgrade
 ```
 
-#### 5. Buat Akun Administrator
-Aplikasi memerlukan satu akun sistem (`sistem@gabutpay.com`) untuk menampung dana dari biaya layanan. Buat akun ini menggunakan skrip yang telah disediakan.
-
+### Langkah 5: Setup Akun Sistem
+Sistem memerlukan satu akun administrator utama untuk mengelola dana dari biaya layanan (*fees*):
 ```bash
 python create_admin.py
 ```
 
-#### 6. Jalankan Aplikasi
-Setelah semua setup selesai, jalankan server development Flask.
+---
 
+## 5. Cara Penggunaan
+
+### Menjalankan Aplikasi
+Gunakan perintah berikut untuk memulai server pengembangan:
 ```bash
 python run.py
 ```
-Aplikasi akan berjalan secara default di `http://127.0.0.1:5001`.
+Aplikasi secara default dapat diakses melalui browser di alamat `http://127.0.0.1:5000`.
 
-## Lisensi
-Proyek ini dilisensikan di bawah [MIT License](LICENSE).
+### Integrasi Inbound (Untuk Partner)
+Untuk menggunakan API Inbound, pastikan Anda telah:
+1.  Mendaftarkan API Key di Dashboard Merchant.
+2.  Meminta Administrator untuk mengaktifkan status **Partner** pada akun Anda.
+3.  Mendaftarkan IP Server Anda pada konfigurasi API Key di panel admin.
+
+Kirimkan permintaan `POST` ke `/api/v1/inbound-transfer` dengan header `X-SIGNATURE` yang valid untuk memproses penambahan saldo pengguna secara otomatis.
+
+---
+
+## 6. Lisensi
+Proyek ini didistribusikan di bawah lisensi **MIT**. Anda diizinkan untuk memodifikasi dan mendistribusikan ulang dengan tetap menyertakan atribusi penulis asli.
