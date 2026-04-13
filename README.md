@@ -1,5 +1,8 @@
 # GabutPay: Solusi Simulasi E-Wallet dan Payment Gateway
 
+> **⚠️ PERINGATAN PENTING (DISCLAIMER):**
+> Proyek ini dibuat sepenuhnya untuk **tujuan pembelajaran, demonstrasi teknis, dan portofolio**. Seluruh transaksi, saldo, dan aliran dana di dalam aplikasi ini adalah **SIMULASI** dan tidak menggunakan atau melibatkan uang asli (fiat) maupun aset kripto. Penulis tidak bertanggung jawab atas penyalahgunaan aplikasi ini di luar tujuan pembelajaran.
+
 GabutPay adalah platform simulasi keuangan berbasis web yang dirancang menggunakan kerangka kerja **Python Flask**. Proyek ini berfungsi ganda sebagai dompet digital (*e-wallet*) bagi pengguna umum dan sebagai gerbang pembayaran (*payment gateway*) bagi pengembang atau mitra bisnis. 
 
 Tujuan utama proyek ini adalah untuk mendemonstrasikan implementasi sistem transaksi keuangan yang aman, menangani integrasi API antar sistem, serta mengelola integritas data dalam lingkungan yang terdistribusi.
